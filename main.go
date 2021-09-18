@@ -3,17 +3,29 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"gorepair-rest-api/config"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
+
+	"github.com/labstack/echo/v4"
 )
 
 func main() {
 	// Server
-	http.HandleFunc("/v1/users", getUser)
-	http.HandleFunc("/v1/workshops", getWorkshop)
+	e := echo.New()
+	
+	// User routes
+	e.GET("/v1/users", GetUser)
+	e.GET("/v1/users/:id", GetUser)
+
+	// Workshop routes
+	e.GET("/v1/workshops", GetWorkshop)
+	e.GET("/v1/workshops/:id", GetWorkshop)
+
 	fmt.Println("Starting REST API web server at http://localhost:8000/")
-	http.ListenAndServe(":8000", nil)
+	e.Start(":8000")
 }
 
 // GoRepair REST API
@@ -36,18 +48,14 @@ var user = []User{
 	{2, "kunkka@gmail.com", "kunkka123", geolocation(37.4224764, -122.0842499)},
 }
 
-func getUser(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	if r.Method == "GET" {
-		var result, err = json.Marshal(user)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+func GetUser(c echo.Context) error {
+	id, _ := strconv.Atoi(c.Param("id"))
+	for i, _ := range user {
+		if user[i].Id == id {
+			return c.JSON(http.StatusOK, user[i])
 		}
-		w.Write(result)
-		return
 	}
-	http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	return c.JSON(http.StatusOK, "User not found")
 }
 
 var workshop = []Workshop{
@@ -55,23 +63,17 @@ var workshop = []Workshop{
 	{2, "bengkelkunkka@gmail.com", "bengkelkunkka123", geolocation(37.4224764, -122.0842499)},
 }
 
-func getWorkshop(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	if r.Method == "GET" {
-		var result, err = json.Marshal(workshop)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+func GetWorkshop(c echo.Context) error {
+	id, _ := strconv.Atoi(c.Param("id"))
+	for i, _ := range workshop {
+		if workshop[i].Id == id {
+			return c.JSON(http.StatusOK, workshop[i])
 		}
-		w.Write(result)
-		return
 	}
-	http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	return c.JSON(http.StatusOK, "Workshop not found")
 }
 
 // HERE Geocoding and Search API
-const API_KEY = "ydHGJC-tW01mfH8P68eLNt9HHdA4wG_YTYtnr0qT-1M" //"HERE_API_KEY"
-
 type output struct {
     Items []struct {
         Title string `json:"title"`
@@ -80,7 +82,13 @@ type output struct {
 
 func geolocation(lat, lng float64) string {
 	var address string
-	url := "https://revgeocode.search.hereapi.com/v1/revgeocode?apiKey=" + API_KEY + "&at=" + fmt.Sprint(lat) + "," + fmt.Sprint(lng)
+	// load env
+	config, cErr := config.LoadConfig(".")
+	if cErr != nil {
+		log.Fatalln("Cannot load config", cErr)
+	}
+
+	url := "https://revgeocode.search.hereapi.com/v1/revgeocode?apiKey=" + config.HERE_API_KEY + "&at=" + fmt.Sprint(lat) + "," + fmt.Sprint(lng)
     res, err := http.Get(url)
     if err != nil {
         log.Fatalln(err)
@@ -96,6 +104,6 @@ func geolocation(lat, lng float64) string {
 	for _, add := range data.Items {
 		address = add.Title
 	}
-	fmt.Println(address)
+	// fmt.Println(address)
 	return address
 }
