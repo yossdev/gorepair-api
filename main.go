@@ -43,34 +43,26 @@ type Workshop struct {
 	Address  string
 }
 
-var user = []User{
-	{1, "axe@gmail.com", "axe123", geolocation(42.36399, -71.05493)},
-	{2, "kunkka@gmail.com", "kunkka123", geolocation(37.4224764, -122.0842499)},
-}
-
 func GetUser(c echo.Context) error {
 	id, _ := strconv.Atoi(c.Param("id"))
-	for i := range user {
-		if user[i].Id == id {
-			return c.JSON(http.StatusOK, user[i])
-		}
+	user := []User{
+		{id, "axe@gmail.com", "axe123", geolocation(42.36399, -71.05493)},
+		{id, "kunkka@gmail.com", "kunkka123", geolocation(37.4224764, -122.0842499)},
 	}
-	return c.JSON(http.StatusOK, "User not found")
-}
-
-var workshop = []Workshop{
-	{1, "bengkelaxe@gmail.com", "bengkelaxe123", geolocation(42.36399, -71.05493)},
-	{2, "bengkelkunkka@gmail.com", "bengkelkunkka123", geolocation(37.4224764, -122.0842499)},
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"user": user,
+	})
 }
 
 func GetWorkshop(c echo.Context) error {
 	id, _ := strconv.Atoi(c.Param("id"))
-	for i := range workshop {
-		if workshop[i].Id == id {
-			return c.JSON(http.StatusOK, workshop[i])
-		}
+	workshop := []Workshop{
+		{id, "bengkelaxe@gmail.com", "bengkelaxe123", geolocation(42.36399, -71.05493)},
+		{id, "bengkelkunkka@gmail.com", "bengkelkunkka123", geolocation(37.4224764, -122.0842499)},
 	}
-	return c.JSON(http.StatusOK, "Workshop not found")
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"workshop": workshop,
+	})
 }
 
 // HERE Geocoding and Search API
