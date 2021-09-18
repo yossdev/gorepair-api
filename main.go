@@ -50,7 +50,7 @@ var user = []User{
 
 func GetUser(c echo.Context) error {
 	id, _ := strconv.Atoi(c.Param("id"))
-	for i, _ := range user {
+	for i := range user {
 		if user[i].Id == id {
 			return c.JSON(http.StatusOK, user[i])
 		}
@@ -65,7 +65,7 @@ var workshop = []Workshop{
 
 func GetWorkshop(c echo.Context) error {
 	id, _ := strconv.Atoi(c.Param("id"))
-	for i, _ := range workshop {
+	for i := range workshop {
 		if workshop[i].Id == id {
 			return c.JSON(http.StatusOK, workshop[i])
 		}
