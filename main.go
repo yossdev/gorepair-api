@@ -27,6 +27,7 @@ func main() {
 	v1.GET("user/:id", UserDetails)
 	v1.POST("sign-up/user", UserRegister)
 	v1.POST("sign-in/user", UserLogin)
+	v1.PUT("user/address/:id", UpdateUserAddress)
 
 	// Workshop routes
 	v1.GET("workshops", GetWorkshops)
@@ -34,6 +35,7 @@ func main() {
 	v1.GET("workshops/find", FindWorkshop)
 	v1.POST("sign-up/workshop", WorkshopRegister)
 	v1.POST("sign-in/workshop", WorkshopLogin)
+	v1.PUT("workshop/description/:id", UpdateWorkshopDescription)
 
 	e.Start(":8000")
 }
@@ -187,12 +189,6 @@ type WorkshopRating struct {
 	UpdatedAt 	time.Time	`json:"updatedAt"`	
 }
 
-// hardcoded data
-// var user = []User{
-// 	{1, "axe@gmail.com", "axe123", geolocation(42.36399, -71.05493)},
-// 	{2, "kunkka@gmail.com", "kunkka123", geolocation(37.4224764, -122.0842499)},
-// }
-
 func UserRegister(c echo.Context) error {
 	var user SignUp
 	c.Bind(&user)
@@ -209,7 +205,6 @@ func UserRegister(c echo.Context) error {
 	userDB.Email = user.Email
 	userDB.Password = user.Password
 	userDB.Phone = user.Phone
-	userDB.Address = UserAddress{CountryCode: "ID"} // TODO: Later replace with geolocation API function (Hardcoded for now)
 
 	result := db.Create(&userDB)
 	if result.Error != nil {
@@ -226,6 +221,28 @@ func UserRegister(c echo.Context) error {
 	})
 }
 
+func UpdateUserAddress(c echo.Context) error {
+	_, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, BaseResponse{
+			Code:    http.StatusInternalServerError,
+			Message: "Id is not valid",
+		})
+	}
+	
+	address := UserAddress{}
+	c.Bind(&address)
+	var userDB User
+	db.First(&userDB, "id = ?", c.Param("id"))
+	userDB.Address = address
+	db.Save(&userDB)
+	return c.JSON(http.StatusOK, BaseResponse{
+		Code: http.StatusOK,
+		Message: "Description Updated",
+		Data: userDB,
+	})
+}
+
 func UserLogin(c echo.Context) error {
 	login := Login{}
 	c.Bind(&login)
@@ -234,13 +251,10 @@ func UserLogin(c echo.Context) error {
 	if result.RowsAffected == 0 {
 		return c.JSON(http.StatusInternalServerError, BaseResponse{
 			Code:    http.StatusInternalServerError,
-			Message: "User is not registered",
-			Data:    nil,
+			Message: "Email or Password is wrong",
+			Data:    login,
 		})
 	}
-	var addressDB UserAddress
-	db.Where("user_id = ?", userDB.ID).Find(&addressDB)
-	userDB.Address = addressDB
 	return c.JSON(http.StatusOK, BaseResponse{
 		Code:    http.StatusOK,
 		Message: "Login success",
@@ -250,7 +264,7 @@ func UserLogin(c echo.Context) error {
 
 func GetUsers(c echo.Context) error {
 	var usersDB []User
-	result := db.Preload("Address").Preload("Orders").Preload("Ratings").Find(&usersDB)
+	result := db.Limit(10).Find(&usersDB)
 	if result.Error != nil {
 		return c.JSON(http.StatusInternalServerError, BaseResponse{
 			Code:    http.StatusInternalServerError,
@@ -273,7 +287,6 @@ func UserDetails(c echo.Context) error {
 			Message: "Id is not valid",
 		})
 	}
-
 	var userDB User
 	db.Preload("Address").Preload("Orders").Preload("Ratings").First(&userDB, "id = ?", c.Param("id"))
 	return c.JSON(http.StatusOK, BaseResponse{
@@ -283,23 +296,97 @@ func UserDetails(c echo.Context) error {
 	})
 }
 
-//============================================================================================
-// hardcoded data
-// var workshop = []Workshop{
-// 	{1, "bengkelaxe@gmail.com", "bengkelaxe123", geolocation(42.36399, -71.05493)},
-// 	{2, "bengkelkunkka@gmail.com", "bengkelkunkka123", geolocation(37.4224764, -122.0842499)},
-// }
+func WorkshopRegister(c echo.Context) error {
+	var workshop SignUp
+	c.Bind(&workshop)
+	if workshop.Name == "" || workshop.Email == "" || workshop.Password == "" || workshop.Phone == "" {
+		return c.JSON(http.StatusBadRequest, BaseResponse{
+			Code:    http.StatusBadRequest,
+			Message: "Request is not valid",
+			Data:    nil,
+		})
+	}
 
-func GetWorkshops(c echo.Context) error {
+	var workshopDB Workshop
+	workshopDB.Name = workshop.Name
+	workshopDB.Email = workshop.Email
+	workshopDB.Password = workshop.Password
+	workshopDB.Phone = workshop.Phone
+
+	result := db.Create(&workshopDB)
+	if result.Error != nil {
+		return c.JSON(http.StatusInternalServerError, BaseResponse{
+			Code:    http.StatusInternalServerError,
+			Message: "Error while input user data",
+			Data:    nil,
+		})
+	}
+	return c.JSON(http.StatusCreated, BaseResponse{
+		Code:    http.StatusCreated,
+		Message: "Account created",
+		Data:    workshopDB,
+	})
+}
+
+func WorkshopLogin(c echo.Context) error {
+	login := Login{}
+	c.Bind(&login)
+	var workshopDB Workshop
+	result := db.Where("email = ? AND password = ?", login.Email, login.Password).Preload("Address").Preload("Orders").Preload("Ratings").Find(&workshopDB)
+	if result.RowsAffected == 0 {
+		return c.JSON(http.StatusInternalServerError, BaseResponse{
+			Code:    http.StatusInternalServerError,
+			Message: "Email or Password is wrong",
+			Data:    login,
+		})
+	}
+	return c.JSON(http.StatusOK, BaseResponse{
+		Code:    http.StatusOK,
+		Message: "Login success",
+		Data:    workshopDB,
+	})
+}
+
+func UpdateWorkshopDescription(c echo.Context) error {
+	_, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, BaseResponse{
+			Code:    http.StatusInternalServerError,
+			Message: "Id is not valid",
+		})
+	}
+	description := Description{}
+	c.Bind(&description)
+	var workshopDB Workshop
+	db.First(&workshopDB, "id = ?", c.Param("id"))
+	workshopDB.Description = description
+	db.Save(&workshopDB)
 	return c.JSON(http.StatusOK, BaseResponse{
 		Code: http.StatusOK,
+		Message: "Description Updated",
+		Data: workshopDB,
+	})
+}
+
+func GetWorkshops(c echo.Context) error {
+	var workshopDB []Workshop
+	result := db.Limit(10).Preload("Address").Preload("Services").Preload("Orders").Preload("Ratings").Find(&workshopDB)
+	if result.Error != nil {
+		return c.JSON(http.StatusInternalServerError, BaseResponse{
+			Code:    http.StatusInternalServerError,
+			Message: "Error while retrieving user data",
+			Data:    nil,
+		})
+	}
+	return c.JSON(http.StatusOK, BaseResponse{
+		Code:    http.StatusOK,
 		Message: "Success",
-		Data: Workshop{},
+		Data:    workshopDB,
 	})
 }
 
 func WorkshopDetails(c echo.Context) error {
-	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	_, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, BaseResponse{
 			Code: http.StatusInternalServerError,
@@ -307,45 +394,22 @@ func WorkshopDetails(c echo.Context) error {
 			Data: nil,
 		})
 	}
+	var workshopDB Workshop
+	db.Preload("Address").Preload("Orders").Preload("Ratings").First(&workshopDB, "id = ?", c.Param("id"))
 	return c.JSON(http.StatusOK, BaseResponse{
 		Code: http.StatusOK,
 		Message: "Success",
-		Data: Workshop{ID: id}, // will check to database for now it will be empty
+		Data: workshopDB,
 	})
 }
 
 func FindWorkshop(c echo.Context) error {
-	match := c.QueryParam("name")
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"name": match,
-		"result": []string{"jaya bengkel", "honda", "suzuki"}, // hardcoded data for now
-	})
-}
-
-func WorkshopRegister(c echo.Context) error {
-	name := c.FormValue("name")
-	email := c.FormValue("email")
-	password := c.FormValue("password")
-
-	var workshop SignUp
-	workshop.Name = name
-	workshop.Email = email
-	workshop.Password = password
-
+	var workshopDB []Workshop
+	db.Limit(10).Where("name LIKE ?", "%"+c.QueryParam("name")+"%").Preload("Address").Preload("Services").Preload("Orders").Preload("Ratings").Find(&workshopDB)
 	return c.JSON(http.StatusOK, BaseResponse{
 		Code: http.StatusOK,
 		Message: "Success",
-		Data: workshop,
-	})
-}
-
-func WorkshopLogin(c echo.Context) error {
-	login := Login{}
-	c.Bind(&login)
-	return c.JSON(http.StatusOK, BaseResponse{
-		Code: http.StatusOK,
-		Message: "Success",
-		Data: login,
+		Data: workshopDB,
 	})
 }
 
