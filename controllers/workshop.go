@@ -3,6 +3,7 @@ package controllers
 import (
 	"gorepair-rest-api/lib/database"
 	"gorepair-rest-api/models"
+	"gorepair-rest-api/models/tables"
 	"net/http"
 	"strconv"
 
@@ -44,7 +45,7 @@ func UpdateWorkshopAddressCtrl(c echo.Context) error {
 		})
 	}
 
-	address := models.WorkshopAddress{}
+	address := tables.WorkshopAddress{}
 	c.Bind(&address)
 	workshop := database.UpdateWorkshopAddress(c.Param("id"), address)
 	if workshop == nil {
@@ -126,7 +127,7 @@ func UpdateWorkshopDescriptionCtrl(c echo.Context) error {
 			Message: "Id is not valid",
 		})
 	}
-	description := models.Description{}
+	description := tables.Description{}
 	c.Bind(&description)
 	result := database.UpdateWorkshopDescription(c.Param("id"), description)
 	if result == nil {

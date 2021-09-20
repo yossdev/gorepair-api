@@ -3,6 +3,7 @@ package controllers
 import (
 	"gorepair-rest-api/lib/database"
 	"gorepair-rest-api/models"
+	"gorepair-rest-api/models/tables"
 	"net/http"
 	"strconv"
 
@@ -44,7 +45,7 @@ func UpdateUserAddressCtrl(c echo.Context) error {
 		})
 	}
 
-	address := models.UserAddress{}
+	address := tables.UserAddress{}
 	c.Bind(&address)
 	user := database.UpdateUserAddress(c.Param("id"), address)
 	if user == nil {

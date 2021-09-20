@@ -3,10 +3,11 @@ package database
 import (
 	"gorepair-rest-api/config"
 	"gorepair-rest-api/models"
+	"gorepair-rest-api/models/tables"
 )
 
 func WorkshopRegister(u models.SignUp) interface{} {
-	var workshop models.Workshop
+	var workshop tables.Workshop
 	workshop.Name = u.Name
 	workshop.Email = u.Email
 	workshop.Password = u.Password
@@ -18,8 +19,8 @@ func WorkshopRegister(u models.SignUp) interface{} {
 	return workshop
 }
 
-func UpdateWorkshopAddress(param string, update models.WorkshopAddress) interface{} {
-	var workshop models.Workshop
+func UpdateWorkshopAddress(param string, update tables.WorkshopAddress) interface{} {
+	var workshop tables.Workshop
 	e := config.DB.First(&workshop, "id = ?", param)
 	if e.Error != nil {
 		return nil
@@ -30,7 +31,7 @@ func UpdateWorkshopAddress(param string, update models.WorkshopAddress) interfac
 }
 
 func WorkshopLogin(login models.Login) interface{} {
-	var workshop models.Workshop
+	var workshop tables.Workshop
 	result := config.DB.Where("email = ? AND password = ?", login.Email, login.Password).Preload("Address").Preload("Orders").Preload("Ratings").Find(&workshop)
 	if result.Error != nil || result.RowsAffected == 0 {
 		return nil
@@ -39,7 +40,7 @@ func WorkshopLogin(login models.Login) interface{} {
 }
 
 func GetWorkshops() (interface{}, error) {
-	var workshop []models.Workshop
+	var workshop []tables.Workshop
 	if e := config.DB.Limit(10).Preload("Address").Preload("Orders").Preload("Ratings").Find(&workshop).Error; e != nil {
 		return nil, e
 	}
@@ -47,7 +48,7 @@ func GetWorkshops() (interface{}, error) {
 }
 
 func WorkshopDetails(param string) (interface{}, error) {
-	var workshop models.Workshop
+	var workshop tables.Workshop
 	if e := config.DB.Preload("Address").Preload("Orders").Preload("Ratings").First(&workshop, "id = ?", param).Error; e != nil {
 		return nil, e
 	}
@@ -55,7 +56,7 @@ func WorkshopDetails(param string) (interface{}, error) {
 }
 
 func FindWorkshop(param string) interface{} {
-	var workshop []models.Workshop
+	var workshop []tables.Workshop
 	e := config.DB.Limit(10).Where("name LIKE ?", "%"+param+"%").Preload("Address").Preload("Services").Preload("Orders").Preload("Ratings").Find(&workshop)
 	if e.Error != nil {
 		return nil
@@ -63,8 +64,8 @@ func FindWorkshop(param string) interface{} {
 	return workshop
 }
 
-func UpdateWorkshopDescription(param string, update models.Description) interface{} {
-	var workshop models.Workshop
+func UpdateWorkshopDescription(param string, update tables.Description) interface{} {
+	var workshop tables.Workshop
 	e := config.DB.First(&workshop, "id = ?", param)
 	if e.Error != nil {
 		return nil
