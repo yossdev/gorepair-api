@@ -2,7 +2,7 @@ package config
 
 import (
 	"fmt"
-	"gorepair-rest-api/models"
+	"gorepair-rest-api/models/tables"
 	"log"
 
 	"github.com/spf13/viper"
@@ -11,7 +11,6 @@ import (
 )
 
 type Env struct {
-	HERE_API_KEY string `mapstructure:"HERE_API_KEY"`
 	DBUsername   string `mapstructure:"DB_USER"`
 	DBPassword   string `mapstructure:"DB_PASSWORD"`
 	DBHost       string `mapstructure:"DB_HOST"`
@@ -64,14 +63,14 @@ func InitDB() {
 
 func InitMigration() {
 	DB.AutoMigrate(
-		&models.User{},
-		&models.UserAddress{},
-		&models.Workshop{},
-		&models.WorkshopAddress{},
-		&models.Description{},
-		&models.Service{},
-		&models.Order{},
-		&models.OrderStatus{},
-		&models.Rating{},
+		&tables.User{},
+		&tables.UserAddress{},
+		&tables.Workshop{},
+		&tables.WorkshopAddress{},
+		&tables.Description{},
+		&tables.Service{},
+		&tables.Order{},
+		&tables.OrderStatus{},
+		&tables.Rating{},
 	)
 }
