@@ -1,11 +1,14 @@
 package config
 
 import (
+	"context"
 	"fmt"
 	"gorepair-rest-api/models/tables"
 	"log"
 
 	"github.com/spf13/viper"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -73,4 +76,25 @@ func InitMigration() {
 		&tables.OrderStatus{},
 		&tables.Rating{},
 	)
+}
+
+// MongoDB for saving data log
+var Client *mongo.Client
+
+func InitMongo() {
+	// Set client options
+	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+	
+	// Connect to MongoDB
+	var e error
+	Client, e = mongo.Connect(context.TODO(), clientOptions)
+	if e != nil {
+        log.Fatalln(e)
+    }
+	
+	// Check the connection
+	e = Client.Ping(context.TODO(), nil)
+	if e != nil {
+        log.Fatalln(e)
+    }
 }

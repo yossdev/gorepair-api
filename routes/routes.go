@@ -4,11 +4,15 @@ import (
 	"gorepair-rest-api/controllers"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 func New() *echo.Echo {
 	// New Instance
 	e := echo.New()
+
+	e.Pre(middleware.RemoveTrailingSlash())
+	
 	v1 := e.Group("v1/api/")
 
 	// User routes
