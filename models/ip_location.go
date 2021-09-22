@@ -2,7 +2,7 @@ package models
 
 type IpLocation struct {
 	Ip          string  `json:"ip"`
-	CountryCode string  `json:country_code`
+	CountryCode string  `json:"country_code"`
 	CountryName string  `json:"country_name"`
 	RegionCode  string  `json:"region_code"`
 	RegionName  string  `json:"region_name"`
