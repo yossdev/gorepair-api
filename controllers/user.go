@@ -1,8 +1,11 @@
 package controllers
 
 import (
-	"gorepair-rest-api/lib/database"
+	"encoding/json"
+	"gorepair-rest-api/libs/database"
+	"gorepair-rest-api/middlewares"
 	"gorepair-rest-api/models"
+	"gorepair-rest-api/models/responses"
 	"gorepair-rest-api/models/tables"
 	"net/http"
 	"strconv"
@@ -72,10 +75,33 @@ func UserLoginCtrl(c echo.Context) error {
 			Data:    login,
 		})
 	}
+
+	byteData, _ := json.Marshal(user)
+	var u tables.User
+	json.Unmarshal([]byte(byteData), &u)
+	
+	jwtToken, e := middlewares.CreateToken(int(u.ID), u.Name)
+	if e != nil {
+		return c.JSON(http.StatusInternalServerError, models.ApiResponse{
+			Code:    http.StatusInternalServerError,
+			Message: "Internal server error",
+			Data:    nil,
+		})
+	}
+	
+	userResponse := responses.UserResponse{
+		ID:        	u.ID,
+		Email:     	u.Email,
+		Name:		u.Name,
+		Token:     	jwtToken,
+		CreatedAt: 	u.CreatedAt,
+		UpdatedAt: 	u.UpdatedAt,
+	}
+	
 	return c.JSON(http.StatusOK, models.ApiResponse{
 		Code:    http.StatusOK,
 		Message: "Login success",
-		Data:    user,
+		Data:    userResponse,
 	})
 }
 
