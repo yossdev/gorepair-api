@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"gorepair-rest-api/lib/database"
+	"gorepair-rest-api/libs/database"
 	"gorepair-rest-api/models"
 	"gorepair-rest-api/models/tables"
 	"net/http"
