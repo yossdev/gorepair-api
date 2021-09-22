@@ -3,6 +3,7 @@ package controllers
 import (
 	"gorepair-rest-api/lib/database"
 	"gorepair-rest-api/models"
+	"gorepair-rest-api/models/tables"
 	"net/http"
 	"strconv"
 
@@ -13,7 +14,7 @@ func UserRegisterCtrl(c echo.Context) error {
 	var user models.SignUp
 	c.Bind(&user)
 	if user.Name == "" || user.Email == "" || user.Password == "" || user.Phone == "" {
-		return c.JSON(http.StatusBadRequest, models.BaseResponse{
+		return c.JSON(http.StatusBadRequest, models.ApiResponse{
 			Code:    http.StatusBadRequest,
 			Message: "Bad Request",
 			Data:    nil,
@@ -22,13 +23,13 @@ func UserRegisterCtrl(c echo.Context) error {
 
 	result := database.UserRegister(user)
 	if result == nil {
-		return c.JSON(http.StatusInternalServerError, models.BaseResponse{
+		return c.JSON(http.StatusInternalServerError, models.ApiResponse{
 			Code:    http.StatusInternalServerError,
 			Message: "Error while inputing data",
 			Data:    nil,
 		})
 	}
-	return c.JSON(http.StatusCreated, models.BaseResponse{
+	return c.JSON(http.StatusCreated, models.ApiResponse{
 		Code:    http.StatusCreated,
 		Message: "Account created",
 		Data:    result,
@@ -38,22 +39,22 @@ func UserRegisterCtrl(c echo.Context) error {
 func UpdateUserAddressCtrl(c echo.Context) error {
 	_, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, models.BaseResponse{
+		return c.JSON(http.StatusUnprocessableEntity, models.ApiResponse{
 			Code:    http.StatusUnprocessableEntity,
 			Message: "Id is not valid",
 		})
 	}
 
-	address := models.UserAddress{}
+	address := tables.UserAddress{}
 	c.Bind(&address)
 	user := database.UpdateUserAddress(c.Param("id"), address)
 	if user == nil {
-		return c.JSON(http.StatusInternalServerError, models.BaseResponse{
+		return c.JSON(http.StatusInternalServerError, models.ApiResponse{
 			Code:    http.StatusInternalServerError,
 			Message: "Error while updating data",
 		})
 	}
-	return c.JSON(http.StatusOK, models.BaseResponse{
+	return c.JSON(http.StatusOK, models.ApiResponse{
 		Code:    http.StatusOK,
 		Message: "Address successfully updated",
 		Data:    user,
@@ -65,13 +66,13 @@ func UserLoginCtrl(c echo.Context) error {
 	c.Bind(&login)
 	user := database.UserLogin(login)
 	if user == nil {
-		return c.JSON(http.StatusForbidden, models.BaseResponse{
+		return c.JSON(http.StatusForbidden, models.ApiResponse{
 			Code:    http.StatusForbidden,
 			Message: "Email or Password is wrong",
 			Data:    login,
 		})
 	}
-	return c.JSON(http.StatusOK, models.BaseResponse{
+	return c.JSON(http.StatusOK, models.ApiResponse{
 		Code:    http.StatusOK,
 		Message: "Login success",
 		Data:    user,
@@ -81,13 +82,13 @@ func UserLoginCtrl(c echo.Context) error {
 func GetUsersCtrl(c echo.Context) error {
 	users, e := database.GetUsers()
 	if e != nil {
-		return c.JSON(http.StatusInternalServerError, models.BaseResponse{
+		return c.JSON(http.StatusInternalServerError, models.ApiResponse{
 			Code:    http.StatusInternalServerError,
 			Message: "Error while retrieving data",
 			Data:    nil,
 		})
 	}
-	return c.JSON(http.StatusOK, models.BaseResponse{
+	return c.JSON(http.StatusOK, models.ApiResponse{
 		Code:    http.StatusOK,
 		Message: "Success",
 		Data:    users,
@@ -97,7 +98,7 @@ func GetUsersCtrl(c echo.Context) error {
 func UserDetailsCtrl(c echo.Context) error {
 	_, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, models.BaseResponse{
+		return c.JSON(http.StatusUnprocessableEntity, models.ApiResponse{
 			Code:    http.StatusUnprocessableEntity,
 			Message: "Id is not valid",
 		})
@@ -105,13 +106,13 @@ func UserDetailsCtrl(c echo.Context) error {
 
 	users, e := database.UserDetails(c.Param("id"))
 	if e != nil {
-		return c.JSON(http.StatusNotFound, models.BaseResponse{
+		return c.JSON(http.StatusNotFound, models.ApiResponse{
 			Code:    http.StatusNotFound,
 			Message: "User is not exist",
 			Data:    nil,
 		})
 	}
-	return c.JSON(http.StatusOK, models.BaseResponse{
+	return c.JSON(http.StatusOK, models.ApiResponse{
 		Code:    http.StatusOK,
 		Message: "Success",
 		Data:    users,

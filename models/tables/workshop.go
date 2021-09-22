@@ -1,4 +1,4 @@
-package models
+package tables
 
 import (
 	"time"
@@ -18,7 +18,7 @@ type Workshop struct {
 	Address          WorkshopAddress  `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"address"`
 	Services         []Service        `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"services"`
 	Orders           []Order          `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"orders"`
-	Ratings          []Rating		  `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"ratings"`
+	Ratings          []Rating  		  `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"ratings"`
 	CreatedAt        time.Time        `json:"createdAt"`
 	UpdatedAt        time.Time        `json:"updatedAt"`
 }
@@ -32,8 +32,6 @@ type WorkshopAddress struct {
 	CountryCode    string         `gorm:"size:5" json:"countryCode" form:"countryCode"`
 	PostalCode     string         `gorm:"size:10" json:"postalCode" form:"postalCode"`
 	Province       string         `gorm:"size:50" json:"province" form:"province"`
-	Lat 		   float64		  `json:"lat"`
-	Lng 		   float64		  `json:"lng"`
 	CreatedAt      time.Time      `json:"createdAt"`
 	UpdatedAt      time.Time      `json:"updatedAt"`
 	DeletedAt      gorm.DeletedAt `gorm:"index" json:"deletedAt"`
