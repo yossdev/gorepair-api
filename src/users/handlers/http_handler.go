@@ -42,7 +42,7 @@ func (service *userHandlers) Register(ctx *fiber.Ctx) error {
 
 	user, err := service.UserService.Register(*userData)
 	if err != nil {
-		return web.JsonResponse(ctx, http.StatusInternalServerError, err.Error(), nil)
+		return web.JsonResponse(ctx, http.StatusInternalServerError, "User already exist", nil)
 	}
 
 	var res dto.UserResponseBody

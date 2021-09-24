@@ -20,7 +20,7 @@ func NewHttpRoute(r RouterStruct) RouterStruct {
 
 func (c *RouterStruct) GetRoutes() {
 	c.Web.Get("/", func(c *fiber.Ctx) error {
-		return c.Send([]byte("Hello this is my first route in go fiber"))
+		return c.Send([]byte("HOMEPAGE"))
 	})
 
 	webRouterConfig := web.RouterStruct{

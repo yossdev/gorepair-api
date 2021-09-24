@@ -9,28 +9,12 @@ import (
 	"io"
 )
 
-func AddKeyLen(encryptionKey string) string {
-	var min int
-	encryptionKeyLen := len(encryptionKey)
-	if encryptionKeyLen < 32 {
-		min = 32 - encryptionKeyLen
-	} else if encryptionKeyLen > 32 {
-		min = encryptionKeyLen - 32
-	}
-	return encryptionKey + encryptionKey[0:min]
-}
-
-// DencryptionKey should have 32 of length
+// encryptionKey MUST have 32 of length
 func AesCFBDecryption(text string, encryptionKey string) (string, error) {
-	encryptionKey = AddKeyLen(encryptionKey)
-	
-	key, _ := hex.DecodeString(
-		encryptionKey,
-	)
 
-	ciphertext, _ := hex.DecodeString(hex.EncodeToString([]byte(text)))
-	fmt.Println("ini errornya", ciphertext)
-	block, err := aes.NewCipher(key)
+	ciphertext, _ := hex.DecodeString(text)
+
+	block, err := aes.NewCipher([]byte(encryptionKey))
 	if err != nil {
 		return "", err
 	}
@@ -38,10 +22,10 @@ func AesCFBDecryption(text string, encryptionKey string) (string, error) {
 	// The IV needs to be unique, but not secure. Therefore it's common to
 	// include it at the beginning of the ciphertext.
 	if len(ciphertext) < aes.BlockSize {
-		fmt.Println(len(ciphertext), aes.BlockSize)
 		panic("ciphertext too short")
 	}
 	iv := ciphertext[:aes.BlockSize]
+	
 	ciphertext = ciphertext[aes.BlockSize:]
 
 	stream := cipher.NewCFBDecrypter(block, iv)
@@ -54,9 +38,8 @@ func AesCFBDecryption(text string, encryptionKey string) (string, error) {
 	return string(ciphertext), nil
 }
 
-// ecryptionKey length must 32
-func AesCFBEncryption(text string, encrypKey string) (string, error) {
-	encryptionKey := AddKeyLen(encrypKey)
+// encryptionKey MUST have 32 of length
+func AesCFBEncryption(text string, encryptionKey string) (string, error) {
 	// Load secret key from app config
 	key := []byte(encryptionKey)
 
@@ -83,5 +66,4 @@ func AesCFBEncryption(text string, encrypKey string) (string, error) {
 	// be secure.
 
 	return fmt.Sprintf("%x", ciphertext), nil
-
 }
