@@ -10,6 +10,7 @@ type UserMysqlRepositoryInterface interface {
 	FindByID(id uint) entities.User
 	FindByEmail(email string) entities.User
 	Register(uname, name, email, password, phone string) (*entities.User, error)
+	GetUser(uname string) (*entities.User, error)
 }
 
 type userMysqlRepository struct {
@@ -35,6 +36,15 @@ func (u *userMysqlRepository) Register(uname, name, email, password, phone strin
 
 	if e.Error != nil {
 		return nil, e.Error
+	}
+	return &user, nil
+}
+
+func (u *userMysqlRepository) GetUser(param string) (*entities.User, error) {
+	user := entities.User{}
+
+	if e := u.DB.DB().First(&user, "username = ?", param).Error; e != nil {
+		return nil, e
 	}
 	return &user, nil
 }

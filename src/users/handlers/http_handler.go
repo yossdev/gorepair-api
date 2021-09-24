@@ -15,6 +15,7 @@ type UserHandlers interface {
 	Register(ctx *fiber.Ctx) error
 	Login(ctx *fiber.Ctx) error
 	Refresh(ctx *fiber.Ctx) error
+	GetUser(ctx *fiber.Ctx) error
 }
 
 type userHandlers struct {
@@ -69,6 +70,15 @@ func (service *userHandlers) Login(ctx *fiber.Ctx) error {
 	}
 
 	return web.JsonResponse(ctx, http.StatusOK, "", res)
+}
+
+func (service *userHandlers) GetUser(ctx *fiber.Ctx) error {
+	user, err := service.UserService.GetUser(ctx.Params("username"))
+	if err != nil {
+		return web.JsonResponse(ctx, http.StatusNotFound, "User is not exist", nil)
+	}
+
+	return web.JsonResponse(ctx, http.StatusOK, "Success", user)
 }
 
 func (service *userHandlers) Refresh(ctx *fiber.Ctx) error {

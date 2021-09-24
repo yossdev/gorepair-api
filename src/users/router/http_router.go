@@ -25,8 +25,8 @@ func (r *RouterStruct) GetRoute() {
 	userService := services.NewUserService(userMysqlRepo, r.jwtAuth, userScribleRepo)
 	userHandlers := handlers.NewHttpHandler(userService)
 
-	// r.Web.Get("/user/:username", userHandlers.GetUser)
-	r.Web.Post("/user/register", userHandlers.Register)
-	r.Web.Post("/user/login", userHandlers.Login)
-	r.Web.Post("/user/refresh-token", middleware.JwtVerifyRefresh, userHandlers.Refresh)
+	r.Web.Get("api/v1/user/:username", userHandlers.GetUser)
+	r.Web.Post("api/v1/user/register", userHandlers.Register)
+	r.Web.Post("api/v1/user/login", userHandlers.Login)
+	r.Web.Post("api/v1/user/refresh-token", middleware.JwtVerifyRefresh, userHandlers.Refresh)
 }
