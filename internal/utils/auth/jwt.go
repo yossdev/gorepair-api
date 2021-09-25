@@ -88,7 +88,7 @@ func (o jwtToken) Sign(claims jwt.MapClaims) TokenStruct {
 
 	//save token to scrible db
 	go func() {
-		encryptedRefreshToken, err := encryption.AesCFBDecryption(refreshTokenString, config.Get().AppKey)
+		encryptedRefreshToken, err := encryption.AesCFBEncryption(refreshTokenString, config.Get().AppKey)
 		if err != nil {
 			logger.Log.Errorln(err)
 		}
@@ -115,6 +115,9 @@ func (o jwtToken) Sign(claims jwt.MapClaims) TokenStruct {
 	}
 }
 
+
+// ! NOT USING REDIS FOR NOW
+// TODO: Uncomment this if using redis and set-up RedisDB
 // // Sign ins method to generate jwt token and refresh token
 // // it has ... parameter
 // // userdata is map data, it's using for passing user data

@@ -1,14 +1,28 @@
 package logger
 
 import (
+	"context"
 	"gorepair-rest-api/config"
+	"gorepair-rest-api/infrastructures/db"
 	"log"
 	"os"
 	"sync"
+	"time"
 
+	"github.com/gofiber/fiber/v2"
 	"github.com/sirupsen/logrus"
 	"github.com/snowzach/rotatefilehook"
 )
+
+type httpLog struct {
+	Created time.Time
+	Message string
+}
+
+// type CustomResponseWriter struct {
+// 	w  http.ResponseWriter
+// 	Code int
+// }
 
 var once sync.Once
 
@@ -58,4 +72,49 @@ func newLogger() *logrus.Logger {
 	Log.AddHook(rotateFileHook)
 
 	return Log
+}
+
+// func NewCustomResponseWriter(ww http.ResponseWriter) *CustomResponseWriter {
+// 	return &CustomResponseWriter{
+// 		w: ww,
+// 		Code: 0,
+// 	}
+// }
+
+// func (w *CustomResponseWriter) Header() http.Header {
+// 	return w.w.Header()
+// }
+
+// func (w *CustomResponseWriter) Write(b []byte) (int, error) {
+// 	return w.w.Write(b)
+// }
+
+// func (w *CustomResponseWriter) WriteHeader(statusCode int) {
+// 	w.Code = statusCode
+// 	w.w.WriteHeader(statusCode)
+// }
+
+// func logRequest(handler http.Handler) http.Handler {
+// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// 		w2 := NewCustomResponseWriter(w)
+// 		handler.ServeHTTP(w2, r)
+// 		log.Printf("%d %s %s\n", w2.Code, r.Method, r.URL)
+// 	})
+// }
+
+// func log() {
+	
+// }
+
+// app.Use("/api", })
+
+func LogToMongo(c *fiber.Ctx)  {
+	collection := db.NewMongoClient().DB().Database(config.Get().MongoDb_Name).Collection(config.Get().MongoDb_Collection)
+	var claims string
+    c.Locals("claims", claims)
+    c.Next()
+	_, e := collection.InsertOne(context.TODO(), claims)
+	if e != nil {
+		log.Fatalln(e)
+	}
 }
