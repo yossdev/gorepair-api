@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
 type RouterStruct struct {
@@ -20,8 +21,10 @@ func NewHttpRoute(r RouterStruct) RouterStruct {
 
 func (c *RouterStruct) GetRoutes() {
 	c.Web.Get("/", func(c *fiber.Ctx) error {
-		return c.Send([]byte("HOMEPAGE"))
+		return c.JSON("HOMEPAGE")
 	})
+
+	c.Web.Use(logger.New())
 
 	webRouterConfig := web.RouterStruct{
 		Web:       c.Web,
