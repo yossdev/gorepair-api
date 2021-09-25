@@ -9,7 +9,8 @@ type UserMysqlRepositoryInterface interface {
 	FindAll() []entities.User
 	FindByID(id uint) entities.User
 	FindByEmail(email string) entities.User
-	Register(uname, name, email, password, phone string) entities.User
+	Register(uname, name, email, password, phone string) (*entities.User, error)
+	GetUser(uname string) (*entities.User, error)
 }
 
 type userMysqlRepository struct {
@@ -22,8 +23,8 @@ func NewUserMysqlRepository(DB db.MysqlDB) UserMysqlRepositoryInterface {
 	}
 }
 
-func (u *userMysqlRepository) Register(uname, name, email, password, phone string) entities.User {
-	var user entities.User
+func (u *userMysqlRepository) Register(uname, name, email, password, phone string) (*entities.User, error) {
+	user := entities.User{}
 	
 	user.Username = uname
 	user.Name = name
@@ -32,10 +33,20 @@ func (u *userMysqlRepository) Register(uname, name, email, password, phone strin
 	user.Phone = phone
 
 	e := u.DB.DB().Create(&user)
+
 	if e.Error != nil {
-		return user
+		return nil, e.Error
 	}
-	return user
+	return &user, nil
+}
+
+func (u *userMysqlRepository) GetUser(param string) (*entities.User, error) {
+	user := entities.User{}
+
+	if e := u.DB.DB().First(&user, "username = ?", param).Error; e != nil {
+		return nil, e
+	}
+	return &user, nil
 }
 
 func (u *userMysqlRepository) FindAll() []entities.User {

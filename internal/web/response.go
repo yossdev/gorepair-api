@@ -1,8 +1,6 @@
 package web
 
-import (
-	"github.com/gofiber/fiber/v2"
-)
+import "github.com/gofiber/fiber/v2"
 
 type Response struct {
 	Code    int         `json:"code"`

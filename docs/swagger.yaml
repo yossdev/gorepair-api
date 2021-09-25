@@ -951,4 +951,4 @@ servers:
   # Added by API Auto Mocking Plugin
   - description: SwaggerHub API Auto Mocking
     url: https://virtserver.swaggerhub.com/yossdev/gorepair-rest-api/1.0.0
-  - url: "https://localhost:8000/v1/api"
+  - url: "http://127.0.0.1:3000/api/v1" #for local server

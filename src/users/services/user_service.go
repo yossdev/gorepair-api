@@ -15,7 +15,8 @@ import (
 
 type UserService interface {
 	FindByID(id uint) entities.User
-	Register(data dto.UserRequestRegisterBody) (entities.User, error)
+	GetUser(username string) (*entities.User, error)
+	Register(data dto.UserRequestRegisterBody) (*entities.User, error)
 	Login(data *dto.UserRequestLoginBody) (dto.UserTokenResponseBody, error)
 	RefreshToken(userID string) (dto.UserTokenResponseBody, error)
 }
@@ -42,12 +43,11 @@ func (c *userService) FindByID(id uint) entities.User {
 	return c.userMysqlRepository.FindByID(id)
 }
 
-func (c *userService) Register(data dto.UserRequestRegisterBody) (entities.User, error) {
+func (c *userService) Register(data dto.UserRequestRegisterBody) (*entities.User, error) {
 	password, _ := helper.Hash(data.Password)
 
-	user := c.userMysqlRepository.Register(data.Username, data.Name, data.Email, password, data.Phone)
-
-	return user, nil
+	user, err := c.userMysqlRepository.Register(data.Username, data.Name, data.Email, password, data.Phone)
+	return user, err
 }
 
 func (c *userService) Login(data *dto.UserRequestLoginBody) (dto.UserTokenResponseBody, error) {
@@ -69,6 +69,11 @@ func (c *userService) Login(data *dto.UserRequestLoginBody) (dto.UserTokenRespon
 	token := dto.UserTokenResponseBody(userToken)
 
 	return token, nil
+}
+
+func (c *userService) GetUser(username string) (*entities.User, error) {
+	user, err := c.userMysqlRepository.GetUser(username)
+	return user, err
 }
 
 func (c *userService) RefreshToken(userID string) (dto.UserTokenResponseBody, error) {
