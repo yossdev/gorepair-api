@@ -7,7 +7,7 @@ import (
 
 type UserMysqlRepositoryInterface interface {
 	FindAll() []entities.User
-	FindByID(id uint) entities.User
+	FindByID(id uint64) entities.User
 	FindByEmail(email string) entities.User
 	Register(uname, name, email, password, phone string) (*entities.User, error)
 	GetUser(uname string) (*entities.User, error)
@@ -25,7 +25,7 @@ func NewUserMysqlRepository(DB db.MysqlDB) UserMysqlRepositoryInterface {
 
 func (u *userMysqlRepository) Register(uname, name, email, password, phone string) (*entities.User, error) {
 	user := entities.User{}
-	
+
 	user.Username = uname
 	user.Name = name
 	user.Email = email
@@ -33,10 +33,10 @@ func (u *userMysqlRepository) Register(uname, name, email, password, phone strin
 	user.Phone = phone
 
 	e := u.DB.DB().Create(&user)
-
 	if e.Error != nil {
 		return nil, e.Error
 	}
+	
 	return &user, nil
 }
 
@@ -56,7 +56,7 @@ func (u *userMysqlRepository) FindAll() []entities.User {
 	return users
 }
 
-func (u *userMysqlRepository) FindByID(id uint) entities.User {
+func (u *userMysqlRepository) FindByID(id uint64) entities.User {
 	var user entities.User
 	u.DB.DB().First(&user, id)
 

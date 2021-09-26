@@ -2,8 +2,9 @@ package services
 
 import (
 	"database/sql"
-	"gorepair-rest-api/helper"
+
 	"gorepair-rest-api/internal/utils/auth"
+	"gorepair-rest-api/internal/utils/helper"
 	"gorepair-rest-api/src/users/dto"
 	"gorepair-rest-api/src/users/entities"
 	"gorepair-rest-api/src/users/repositories"
@@ -14,10 +15,10 @@ import (
 )
 
 type UserService interface {
-	FindByID(id uint) entities.User
-	GetUser(username string) (*entities.User, error)
 	Register(data dto.UserRequestRegisterBody) (*entities.User, error)
 	Login(data *dto.UserRequestLoginBody) (dto.UserTokenResponseBody, error)
+	GetUser(username string) (*entities.User, error)
+	FindByID(id uint64) entities.User
 	RefreshToken(userID string) (dto.UserTokenResponseBody, error)
 }
 
@@ -37,10 +38,6 @@ func NewUserService(
 		userMysqlRepository:   userMysqlRepository,
 		jwtAuth:               jwtAuth,
 	}
-}
-
-func (c *userService) FindByID(id uint) entities.User {
-	return c.userMysqlRepository.FindByID(id)
 }
 
 func (c *userService) Register(data dto.UserRequestRegisterBody) (*entities.User, error) {
@@ -73,7 +70,12 @@ func (c *userService) Login(data *dto.UserRequestLoginBody) (dto.UserTokenRespon
 
 func (c *userService) GetUser(username string) (*entities.User, error) {
 	user, err := c.userMysqlRepository.GetUser(username)
+
 	return user, err
+}
+
+func (c *userService) FindByID(id uint64) entities.User {
+	return c.userMysqlRepository.FindByID(id)
 }
 
 func (c *userService) RefreshToken(userID string) (dto.UserTokenResponseBody, error) {

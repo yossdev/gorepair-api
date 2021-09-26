@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"gorepair-rest-api/internal/utils/helper"
 	"gorepair-rest-api/internal/web"
 	"gorepair-rest-api/src/users/dto"
 	"gorepair-rest-api/src/users/services"
@@ -14,17 +15,15 @@ import (
 type UserHandlers interface {
 	Register(ctx *fiber.Ctx) error
 	Login(ctx *fiber.Ctx) error
-	Refresh(ctx *fiber.Ctx) error
 	GetUser(ctx *fiber.Ctx) error
+	Refresh(ctx *fiber.Ctx) error
 }
 
 type userHandlers struct {
 	UserService services.UserService
 }
 
-func NewHttpHandler(
-	userService services.UserService,
-) UserHandlers {
+func NewHttpHandler(userService services.UserService) UserHandlers {
 	return &userHandlers{
 		UserService: userService,
 	}
@@ -32,13 +31,12 @@ func NewHttpHandler(
 
 func (service *userHandlers) Register(ctx *fiber.Ctx) error {
 	userData := new(dto.UserRequestRegisterBody)
-
 	if err := ctx.BodyParser(userData); err != nil {
 		log.Fatal(err)
 	}
 
-	if userData.Username == "" || userData.Name == "" || userData.Email == "" || userData.Password == "" || userData.Phone == "" {
-		return web.JsonResponse(ctx, http.StatusBadRequest,  "Bad Request", nil)
+	if ok, _ := helper.ValidateInputs(*userData); !ok {
+		return web.JsonResponse(ctx, http.StatusBadRequest,  "field cannot be empty", nil)
 	}
 
 	user, err := service.UserService.Register(*userData)
@@ -59,7 +57,6 @@ func (service *userHandlers) Register(ctx *fiber.Ctx) error {
 
 func (service *userHandlers) Login(ctx *fiber.Ctx) error {
 	userData := new(dto.UserRequestLoginBody)
-
 	if err := ctx.BodyParser(userData); err != nil {
 		log.Fatal(err)
 	}

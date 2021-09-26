@@ -10,5 +10,6 @@ import (
 type RouterStruct struct {
 	Web       *fiber.App
 	MysqlDB   db.MysqlDB
+	MongoDB	  db.MongoDB
 	ScribleDB local_db.ScribleDB
 }
