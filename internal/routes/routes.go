@@ -1,11 +1,14 @@
 package routes
 
 import (
+	"gorepair-rest-api/internal/middleware"
 	"gorepair-rest-api/internal/web"
 	userRoute "gorepair-rest-api/src/users/router"
 	"log"
+	"net/http"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
@@ -20,15 +23,18 @@ func NewHttpRoute(r RouterStruct) RouterStruct {
 }
 
 func (c *RouterStruct) GetRoutes() {
-	c.Web.Get("/", func(c *fiber.Ctx) error {
-		return c.JSON("HOMEPAGE")
-	})
 
-	c.Web.Use(logger.New())
+	c.Web.Use(logger.New(), cors.New())
+	c.Web.Use(middleware.LogReqRes)
+
+	c.Web.Get("/", func(c *fiber.Ctx) error {
+		return web.JsonResponse(c, http.StatusOK, "HOMEPAGE", nil)
+	})
 
 	webRouterConfig := web.RouterStruct{
 		Web:       c.Web,
 		MysqlDB:   c.MysqlDB,
+		MongoDB:   c.MongoDB,
 		ScribleDB: c.ScribleDB,
 	}
 	// registering route from another modules
@@ -40,6 +46,6 @@ func (c *RouterStruct) GetRoutes() {
 
 	// handling 404 error
 	c.Web.Use(func(c *fiber.Ctx) error {
-		return c.Status(fiber.StatusNotFound).SendString("Sorry can't find that!")
+		return web.JsonResponse(c, http.StatusNotFound, "Sorry can't find that!", nil)
 	})
 }

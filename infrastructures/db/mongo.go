@@ -35,6 +35,8 @@ func NewMongoClient() MongoDB {
 		log.Fatalln(e)
 	}
 
+	// logger.Log.Infoln("Connected to MongoDB!")
+
 	return &mongoDB{
 		client: client,
 	}

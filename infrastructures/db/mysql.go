@@ -3,7 +3,7 @@ package db
 import (
 	"fmt"
 	"gorepair-rest-api/config"
-	"gorepair-rest-api/src/users/entities"
+	"gorepair-rest-api/infrastructures/migrations"
 	"log"
 
 	"gorm.io/driver/mysql"
@@ -44,7 +44,9 @@ func NewMysqlClient() MysqlDB {
 		log.Println(fmt.Sprintf("Error to loading Database %s", err))
 		return nil
 	}
+	
 	// log.Println("Database was connected")
+	// logger.Log.Infoln("Connected to MySql!")
 	
 	DbMigrate(db)
 	
@@ -59,6 +61,6 @@ func (c mysqlDB) DB() *gorm.DB {
 
 func DbMigrate(db *gorm.DB) {
 	db.AutoMigrate(
-		&entities.User{},
+		&migrations.User{},
 	)
 }
