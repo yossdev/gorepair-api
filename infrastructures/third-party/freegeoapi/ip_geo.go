@@ -22,7 +22,6 @@ func (ipl *IpAPI) GetLocationByIP() (_ipgeo.Domain, error) {
 	url := "https://freegeoip.app/json/"
 	req, _ := http.NewRequest("GET", url, nil)
 	resp, err := http.DefaultClient.Do(req)
-	// resp, err := ipl.httpClient.Get(url)
 	if err != nil {
 		return _ipgeo.Domain{}, err
 	}

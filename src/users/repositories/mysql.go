@@ -16,10 +16,10 @@ func NewUserMysqlRepository(DB db.MysqlDB) entities.Repository {
 }
 
 func (u *userMysqlRepository) Register(data *entities.Users) (*entities.Users, error) {
-	u.DB.DB().Create(&data)
-	// if e.Error != nil {
-	// 	return nil, e.Error
-	// }
+	e := u.DB.DB().Create(&data)
+	if e.Error != nil {
+		return nil, e.Error
+	}
 
 	return data, nil
 }
