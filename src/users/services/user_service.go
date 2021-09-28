@@ -2,14 +2,11 @@ package services
 
 import (
 	"database/sql"
-	"errors"
 	"gorepair-rest-api/infrastructures/third-party/freegeoapi"
-	realemailapi "gorepair-rest-api/infrastructures/third-party/real-email-api"
 	"gorepair-rest-api/internal/utils/auth"
 	"gorepair-rest-api/internal/utils/helper"
 	"gorepair-rest-api/src/users/entities"
 	"gorepair-rest-api/src/users/repositories"
-	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt"
@@ -35,23 +32,12 @@ func NewUserService(
 }
 
 func (c *userService) Register(data *entities.Users) (*entities.Users, error) {
-	_, err := strconv.Atoi(data.Phone)
-	if err != nil {
-		return nil, err
-	}
-	
 	data.Password, _ = helper.Hash(data.Password)
 	user, err := c.userMysqlRepository.Register(data)
 	return user, err
 }
 
 func (c *userService) Login(data *entities.Users) (auth.TokenStruct, error) {
-	// will check the real-world email from api
-	real := realemailapi.RealEmail(data.Email)
-	if real.Status == "invalid" {
-		return auth.TokenStruct{}, errors.New("invalid email")
-	}
-
 	user := c.userMysqlRepository.FindByEmail(data.Email)
 	if user.ID == 0 {
 		return auth.TokenStruct{}, sql.ErrNoRows
