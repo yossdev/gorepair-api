@@ -3,7 +3,7 @@ package routes
 import (
 	"gorepair-rest-api/internal/middleware"
 	"gorepair-rest-api/internal/web"
-	userRoute "gorepair-rest-api/src/users/router"
+	_userRoute "gorepair-rest-api/src/users/router"
 	"log"
 	"net/http"
 
@@ -25,7 +25,7 @@ func NewHttpRoute(r RouterStruct) RouterStruct {
 func (c *RouterStruct) GetRoutes() {
 
 	c.Web.Use(logger.New(), cors.New())
-	c.Web.Use(middleware.LogReqRes)
+	c.Web.Use(middleware.NewLogMongo(c.MongoDB).LogReqRes)
 
 	c.Web.Get("/", func(c *fiber.Ctx) error {
 		return web.JsonResponse(c, http.StatusOK, "HOMEPAGE", nil)
@@ -37,11 +37,12 @@ func (c *RouterStruct) GetRoutes() {
 		MongoDB:   c.MongoDB,
 		ScribleDB: c.ScribleDB,
 	}
+
 	// registering route from another modules
-	userRouterStruct := userRoute.RouterStruct {
+	userRouterStruct := _userRoute.RouterStruct {
 		RouterStruct: webRouterConfig,
 	}
-	userRouter := userRoute.NewHttpRoute(userRouterStruct)
+	userRouter := _userRoute.NewHttpRoute(userRouterStruct)
 	userRouter.GetRoute()
 
 	// handling 404 error

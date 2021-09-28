@@ -946,6 +946,25 @@ paths:
           description: Invalid ID supplied
         "404":
           description: Services not found
+  /services/search?q=:
+    get:
+      tags:
+        - services
+      summary: Search services
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  message:
+                    type: string
+                  data:
+                    type: object
 
 servers:
   # Added by API Auto Mocking Plugin

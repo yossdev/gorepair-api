@@ -1,11 +1,10 @@
 package handlers
 
 import (
-	"fmt"
 	"gorepair-rest-api/internal/utils/helper"
 	"gorepair-rest-api/internal/web"
 	"gorepair-rest-api/src/users/dto"
-	"gorepair-rest-api/src/users/services"
+	"gorepair-rest-api/src/users/entities"
 	"log"
 	"net/http"
 
@@ -20,39 +19,37 @@ type UserHandlers interface {
 }
 
 type userHandlers struct {
-	UserService services.UserService
+	UserService entities.Service
 }
 
-func NewHttpHandler(userService services.UserService) UserHandlers {
+func NewHttpHandler(userService entities.Service) UserHandlers {
 	return &userHandlers{
 		UserService: userService,
 	}
 }
 
 func (service *userHandlers) Register(ctx *fiber.Ctx) error {
+
 	userData := new(dto.UserRequestRegisterBody)
 	if err := ctx.BodyParser(userData); err != nil {
-		log.Fatal(err)
+		return web.JsonResponse(ctx, http.StatusBadRequest, "something is not right", nil)
 	}
 
 	if ok, _ := helper.ValidateInputs(*userData); !ok {
-		return web.JsonResponse(ctx, http.StatusBadRequest,  "field cannot be empty", nil)
+		return web.JsonResponse(ctx, http.StatusBadRequest, "field cannot be empty", nil)
 	}
 
-	user, err := service.UserService.Register(*userData)
+	user, err := service.UserService.Register(userData.ToDomain())
+
+	if user == nil {
+		return web.JsonResponse(ctx, http.StatusUnprocessableEntity, "can't process, check your inputs again!", nil)
+	}
+
 	if err != nil {
 		return web.JsonResponse(ctx, http.StatusInternalServerError, "User already exist", nil)
 	}
 
-	var res dto.UserResponseBody
-
-	res.ID = fmt.Sprint(user.ID)
-	res.Username = user.Username
-	res.Name = user.Name
-	res.Email = user.Email
-	res.Phone = user.Phone
-
-	return web.JsonResponse(ctx, http.StatusCreated, "Account Created", res)
+	return web.JsonResponse(ctx, http.StatusCreated, "Account Created", dto.FromDomain(*user))
 }
 
 func (service *userHandlers) Login(ctx *fiber.Ctx) error {
@@ -61,31 +58,30 @@ func (service *userHandlers) Login(ctx *fiber.Ctx) error {
 		log.Fatal(err)
 	}
 
-	res, err := service.UserService.Login(userData)
+	res, err := service.UserService.Login(userData.ToDomain())
 	if err != nil {
-		return web.JsonResponse(ctx, http.StatusUnauthorized, err.Error(), nil)
+		return web.JsonResponse(ctx, http.StatusUnauthorized, "email or password is wrong!", nil)
 	}
 
-	return web.JsonResponse(ctx, http.StatusOK, "", res)
+	return web.JsonResponse(ctx, http.StatusOK, "welcome!", dto.FromAuth(res))
 }
 
 func (service *userHandlers) GetUser(ctx *fiber.Ctx) error {
 	user, err := service.UserService.GetUser(ctx.Params("username"))
 	if err != nil {
-		return web.JsonResponse(ctx, http.StatusNotFound, "User is not exist", nil)
+		return web.JsonResponse(ctx, http.StatusOK, "User is not exist", nil)
 	}
 
-	return web.JsonResponse(ctx, http.StatusOK, "Success", user)
+	return web.JsonResponse(ctx, http.StatusOK, "Success", dto.FromDomain(*user))
 }
 
 func (service *userHandlers) Refresh(ctx *fiber.Ctx) error {
-	userID := ctx.Get("userID")
+	id := ctx.Get("id")
 
-	res, err := service.UserService.RefreshToken(userID)
-
+	res, err := service.UserService.RefreshToken(id)
 	if err != nil {
 		return web.JsonResponse(ctx, http.StatusUnauthorized, err.Error(), nil)
 	}
 
-	return web.JsonResponse(ctx, http.StatusOK, "", res)
+	return web.JsonResponse(ctx, http.StatusOK, "welcome back!", dto.FromAuth(res))
 }

@@ -12,9 +12,9 @@ import (
 )
 
 type logReq struct {
-	ReqId 		  uint64
+	ReqId 	  uint64
 	Timestamp time.Time
-	RemoteIP 		  string
+	RemoteIP  string
 	Hostname  string
 	Protocol  string
 	Method 	  string
@@ -22,7 +22,21 @@ type logReq struct {
 	Duration  string
 }
 
-func LogReqRes(ctx *fiber.Ctx) error {
+type LogMethod interface {
+	LogReqRes(ctx *fiber.Ctx) error
+}
+
+type logMongo struct {
+	DB db.MongoDB
+}
+
+func NewLogMongo(DB db.MongoDB) LogMethod {
+	return &logMongo{
+		DB: DB,
+	}
+}
+
+func (u *logMongo) LogReqRes(ctx *fiber.Ctx) error {
 	id := ctx.Context().ID()
 	time := ctx.Context().ConnTime()
 	ip := ctx.IP()
@@ -46,18 +60,16 @@ func LogReqRes(ctx *fiber.Ctx) error {
 
 	//save log to mongo db
 	go func() {
-		// TODO find a way to not always init db here
-		session := db.NewMongoClient().DB().Database(config.Get().MongoDb_Name).Collection(config.Get().MongoDb_Collection)
+		session := u.DB.DB().Database(config.Get().MongoDb_Name).Collection(config.Get().MongoDb_Collection)
+
+		// session := db.NewMongoClient().DB().Database(config.Get().MongoDb_Name).Collection(config.Get().MongoDb_Collection)
 
 		_, err := session.InsertOne(context.TODO(), data)
-
 		if err != nil {
 			logger.Log.Infoln("Failed to save logResReq to mongo, with err: ", err)
 		} else {
 			logger.Log.Infoln("Successfully to save logResReq to mongo")
 		}
-
-		// defer db.NewMongoClient().DB().Disconnect(context.TODO())
 	}()
 
 	return ctx.Next()

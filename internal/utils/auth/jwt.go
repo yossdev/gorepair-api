@@ -52,6 +52,7 @@ func (o jwtToken) Sign(claims jwt.MapClaims) TokenStruct {
 	if !checkExp {
 		claims["exp"] = tokenExpired
 	}
+
 	// if user didn't define claims iat
 	if !checkIat {
 		claims["iat"] = timeNow.Unix()
