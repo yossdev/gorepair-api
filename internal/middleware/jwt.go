@@ -93,9 +93,9 @@ func JwtVerifyRefreshRSA(ctx *fiber.Ctx) error {
 		return web.JsonResponse(ctx, res.Code, res.Message, nil)
 	}
 
-	userID := token.Claims.(jwt.MapClaims)["id"].(string)
+	id := token.Claims.(jwt.MapClaims)["id"].(string)
 
-	if userID == "" {
+	if id == "" {
 		res := web.Response{
 			Code:    401,
 			Message: "Token not found",
@@ -113,7 +113,7 @@ func JwtVerifyRefreshRSA(ctx *fiber.Ctx) error {
 		return web.JsonResponse(ctx, res.Code, res.Message, nil)
 	}
 
-	ctx.Context().Request.Header.Set("userID", userID)
+	ctx.Context().Request.Header.Set("ID", id)
 	return ctx.Next()
 }
 
@@ -184,9 +184,9 @@ func JwtVerifyRefresh(ctx *fiber.Ctx) error {
 		return web.JsonResponse(ctx, res.Code, res.Message, nil)
 	}
 
-	rawUserID := token.Claims.(jwt.MapClaims)["id"].(float64)
+	rawID := token.Claims.(jwt.MapClaims)["id"].(float64)
 
-	if rawUserID == 0 {
+	if rawID == 0 {
 		res := web.Response{
 			Code:    401,
 			Message: "Token not found",
@@ -204,8 +204,8 @@ func JwtVerifyRefresh(ctx *fiber.Ctx) error {
 		return web.JsonResponse(ctx, res.Code, res.Message, nil)
 	}
 
-	userID := strconv.Itoa(int(rawUserID))
-	ctx.Context().Request.Header.Set("userID", userID)
+	id := strconv.Itoa(int(rawID))
+	ctx.Context().Request.Header.Set("ID", id)
 
 	return ctx.Next()
 }

@@ -2,37 +2,31 @@ package services
 
 import (
 	"database/sql"
-
+	"errors"
+	"gorepair-rest-api/infrastructures/third-party/freegeoapi"
+	realemailapi "gorepair-rest-api/infrastructures/third-party/real-email-api"
 	"gorepair-rest-api/internal/utils/auth"
 	"gorepair-rest-api/internal/utils/helper"
-	"gorepair-rest-api/src/users/dto"
 	"gorepair-rest-api/src/users/entities"
 	"gorepair-rest-api/src/users/repositories"
+	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
 )
 
-type UserService interface {
-	Register(data dto.UserRequestRegisterBody) (*entities.User, error)
-	Login(data *dto.UserRequestLoginBody) (dto.UserTokenResponseBody, error)
-	GetUser(username string) (*entities.User, error)
-	FindByID(id uint64) entities.User
-	RefreshToken(userID string) (dto.UserTokenResponseBody, error)
-}
-
 type userService struct {
-	userMysqlRepository   repositories.UserMysqlRepositoryInterface
+	userMysqlRepository   entities.Repository
 	userScribleRepository repositories.UserScribleRepositoryInterface
 	jwtAuth               auth.JwtTokenInterface
 }
 
 func NewUserService(
-	userMysqlRepository repositories.UserMysqlRepositoryInterface,
+	userMysqlRepository entities.Repository,
 	jwtAuth auth.JwtTokenInterface,
 	userScribleRepository repositories.UserScribleRepositoryInterface,
-) UserService {
+) entities.Service {
 	return &userService{
 		userScribleRepository: userScribleRepository,
 		userMysqlRepository:   userMysqlRepository,
@@ -40,59 +34,73 @@ func NewUserService(
 	}
 }
 
-func (c *userService) Register(data dto.UserRequestRegisterBody) (*entities.User, error) {
-	password, _ := helper.Hash(data.Password)
-
-	user, err := c.userMysqlRepository.Register(data.Username, data.Name, data.Email, password, data.Phone)
+func (c *userService) Register(data *entities.Users) (*entities.Users, error) {
+	_, err := strconv.Atoi(data.Phone)
+	if err != nil {
+		return nil, err
+	}
+	
+	data.Password, _ = helper.Hash(data.Password)
+	user, err := c.userMysqlRepository.Register(data)
 	return user, err
 }
 
-func (c *userService) Login(data *dto.UserRequestLoginBody) (dto.UserTokenResponseBody, error) {
+func (c *userService) Login(data *entities.Users) (auth.TokenStruct, error) {
+	// will check the real-world email from api
+	real := realemailapi.RealEmail(data.Email)
+	if real.Status == "invalid" {
+		return auth.TokenStruct{}, errors.New("invalid email")
+	}
 
 	user := c.userMysqlRepository.FindByEmail(data.Email)
 	if user.ID == 0 {
-		return dto.UserTokenResponseBody{}, sql.ErrNoRows
+		return auth.TokenStruct{}, sql.ErrNoRows
 	}
-	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(data.Password))
 
+	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(data.Password))
 	if err != nil {
-		return dto.UserTokenResponseBody{}, err
+		return auth.TokenStruct{}, err
 	}
+
+	loc, _ := freegeoapi.NewIpAPI().GetLocationByIP()
 
 	userToken := c.jwtAuth.Sign(jwt.MapClaims{
 		"id": user.ID,
+		"cty": loc.City,
 	})
 
-	token := dto.UserTokenResponseBody(userToken)
-
-	return token, nil
+	return userToken, nil
 }
 
-func (c *userService) GetUser(username string) (*entities.User, error) {
+func (c *userService) GetUser(username string) (*entities.Users, error) {
 	user, err := c.userMysqlRepository.GetUser(username)
-
 	return user, err
 }
 
-func (c *userService) FindByID(id uint64) entities.User {
-	return c.userMysqlRepository.FindByID(id)
+func (c *userService) FindByID(id uint64) (*entities.Users, error) {
+	res, err := c.userMysqlRepository.FindByID(id)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
-func (c *userService) RefreshToken(userID string) (dto.UserTokenResponseBody, error) {
-	refreshToken, err := c.userScribleRepository.FindUserRefreshToken(userID)
+func (c *userService) RefreshToken(id string) (auth.TokenStruct, error) {
+	refreshToken, err := c.userScribleRepository.FindUserRefreshToken(id)
 	if err != nil {
-		return dto.UserTokenResponseBody{}, err
+		return auth.TokenStruct{}, err
 	}
 
 	if refreshToken.Expired < time.Now().Unix() {
-		return dto.UserTokenResponseBody{}, err
+		return auth.TokenStruct{}, err
 	}
 
+	loc, _ := freegeoapi.NewIpAPI().GetLocationByIP()
+
 	userToken := c.jwtAuth.Sign(jwt.MapClaims{
-		"id": userID,
+		"id": id,
+		"cty": loc.City,
 	})
 
-	token := dto.UserTokenResponseBody(userToken)
-
-	return token, nil
+	return userToken, nil
 }

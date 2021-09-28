@@ -5,12 +5,20 @@ import (
 	"gorepair-rest-api/infrastructures/db"
 	"gorepair-rest-api/infrastructures/local_db"
 	"gorepair-rest-api/internal/routes"
-	s "gorepair-rest-api/internal/utils/start-server"
+	_s "gorepair-rest-api/internal/utils/start-server"
 	"gorepair-rest-api/internal/web"
+	"gorepair-rest-api/src/users/repositories"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
 )
+
+func dbMigrate(db *gorm.DB) {
+	db.AutoMigrate(
+		&repositories.User{},
+	)
+}
 
 func main() {
 
@@ -20,21 +28,24 @@ func main() {
 	log.Println("Server running on PORT", appPort)
 
 	mysqlDB := db.NewMysqlClient()
+	dbMigrate(mysqlDB.DB())
+
 	scribleDB := local_db.NewScribleClient()
-	// mongoDB := db.NewMongoClient()
+	mongoDB := db.NewMongoClient()
+
+
 
 	routeStruct := routes.RouterStruct{
 		RouterStruct: web.RouterStruct{
 			Web:       app,
 			MysqlDB:   mysqlDB,
-			// MongoDB:   mongoDB,
+			MongoDB:   mongoDB,
 			ScribleDB: scribleDB,
 		},
 	}
 	router := routes.NewHttpRoute(routeStruct)
 	router.GetRoutes()
-
-	s.StartServer(app)
-	// s.StartServerWithGracefulShutdown(app)
+	_s.StartServer(app)
+	_s.StartServerWithGracefulShutdown(app)
 
 }

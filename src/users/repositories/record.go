@@ -1,6 +1,7 @@
-package migrations
+package repositories
 
 import (
+	"gorepair-rest-api/src/users/entities"
 	"time"
 
 	"gorm.io/datatypes"
@@ -15,7 +16,7 @@ type User struct {
 	Gender   string 		`gorm:"size:1"`
 	DOB      datatypes.Date
 	Phone    string 		`gorm:"size:13; not null"`
-	Address   UserAddress   `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	// Address   UserAddress   `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	// Orders    []Order        `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	// Ratings   []Rating       `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	CreatedAt time.Time
@@ -33,4 +34,24 @@ type UserAddress struct {
 	Province       string `gorm:"size:50"`
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
+}
+
+func (rec *User) ToDomain() entities.Users {
+	return entities.Users{
+		ID: 		rec.ID,
+		Username: 	rec.Username,
+		Email: 		rec.Email,
+		Password: 	rec.Password,
+		Name: 		rec.Name,
+		Phone: 		rec.Phone,
+	}
+}
+
+func FromDomain(userDomain entities.Users) *User {
+	return &User{
+		ID:        userDomain.ID,
+		Name:      userDomain.Name,
+		Username:  userDomain.Username,
+		Password:  userDomain.Password,
+	}
 }

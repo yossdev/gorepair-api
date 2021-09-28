@@ -4,13 +4,12 @@ import (
 	"reflect"
 	"strings"
 
-	"gopkg.in/go-playground/validator.v9"
+	"github.com/go-playground/validator/v10"
 )
 
 func ValidateInputs(dataSet interface{}) (bool, map[string]string) {
-	var validate *validator.Validate
 
-	validate = validator.New()
+	validate := validator.New()
 
 	err := validate.Struct(dataSet)
 
