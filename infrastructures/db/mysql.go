@@ -36,7 +36,9 @@ func NewMysqlClient() MysqlDB {
 		dbName,
 	)
 
-	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
+		SkipDefaultTransaction: true,
+	})
 	// defer db.Close()
 
 	if err != nil {

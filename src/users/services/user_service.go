@@ -6,56 +6,24 @@ import (
 	"gorepair-rest-api/internal/utils/auth"
 	"gorepair-rest-api/internal/utils/helper"
 	"gorepair-rest-api/src/users/entities"
-	"gorepair-rest-api/src/users/repositories"
-	"time"
 
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type userService struct {
-	userMysqlRepository   entities.Repository
-	userScribleRepository repositories.UserScribleRepositoryInterface
+	userMysqlRepository   entities.UserRepository
 	jwtAuth               auth.JwtTokenInterface
 }
 
 func NewUserService(
-	userMysqlRepository entities.Repository,
+	userMysqlRepository entities.UserRepository,
 	jwtAuth auth.JwtTokenInterface,
-	userScribleRepository repositories.UserScribleRepositoryInterface,
-) entities.Service {
+) entities.UserService {
 	return &userService{
-		userScribleRepository: userScribleRepository,
 		userMysqlRepository:   userMysqlRepository,
 		jwtAuth:               jwtAuth,
 	}
-}
-
-func (c *userService) Register(data *entities.Users) (*entities.Users, error) {
-	data.Password, _ = helper.Hash(data.Password)
-	user, err := c.userMysqlRepository.Register(data)
-	return user, err
-}
-
-func (c *userService) Login(data *entities.Users) (auth.TokenStruct, error) {
-	user := c.userMysqlRepository.FindByEmail(data.Email)
-	if user.ID == 0 {
-		return auth.TokenStruct{}, sql.ErrNoRows
-	}
-
-	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(data.Password))
-	if err != nil {
-		return auth.TokenStruct{}, err
-	}
-
-	loc, _ := freegeoapi.NewIpAPI().GetLocationByIP()
-
-	userToken := c.jwtAuth.Sign(jwt.MapClaims{
-		"id": user.ID,
-		"cty": loc.City,
-	})
-
-	return userToken, nil
 }
 
 func (c *userService) GetUser(username string) (*entities.Users, error) {
@@ -63,30 +31,41 @@ func (c *userService) GetUser(username string) (*entities.Users, error) {
 	return user, err
 }
 
-func (c *userService) FindByID(id uint64) (*entities.Users, error) {
-	res, err := c.userMysqlRepository.FindByID(id)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
+func (c *userService) Register(payload *entities.Users) (*entities.Users, error) {
+	payload.Password, _ = helper.Hash(payload.Password)
+	user, err := c.userMysqlRepository.Register(payload)
+	return user, err
 }
 
-func (c *userService) RefreshToken(id string) (auth.TokenStruct, error) {
-	refreshToken, err := c.userScribleRepository.FindUserRefreshToken(id)
-	if err != nil {
-		return auth.TokenStruct{}, err
+func (c *userService) Login(payload *entities.Users) (interface{}, error) {
+	user := c.userMysqlRepository.FindByEmail(payload.Email)
+	if user.ID == 0 {
+		return nil, sql.ErrNoRows
 	}
 
-	if refreshToken.Expired < time.Now().Unix() {
-		return auth.TokenStruct{}, err
+	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(payload.Password))
+	if err != nil {
+		return nil, err
 	}
 
 	loc, _ := freegeoapi.NewIpAPI().GetLocationByIP()
 
-	userToken := c.jwtAuth.Sign(jwt.MapClaims{
-		"id": id,
+	token := c.jwtAuth.Sign(jwt.MapClaims{
+		"id": user.ID,
 		"cty": loc.City,
 	})
 
-	return userToken, nil
+	return token, nil
 }
+
+// func (c *userService) Logout() error {
+	
+// }
+
+// func (c *userService) Account() error {
+	
+// }
+
+// func (c *userService) Address() error {
+	
+// }

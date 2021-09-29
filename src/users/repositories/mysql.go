@@ -9,49 +9,54 @@ type userMysqlRepository struct {
 	DB db.MysqlDB
 }
 
-func NewUserMysqlRepository(DB db.MysqlDB) entities.Repository {
+func NewUserMysqlRepository(DB db.MysqlDB) entities.UserRepository {
 	return &userMysqlRepository{
 		DB: DB,
 	}
 }
 
-func (u *userMysqlRepository) Register(data *entities.Users) (*entities.Users, error) {
-	e := u.DB.DB().Create(&data)
-	if e.Error != nil {
-		return nil, e.Error
-	}
-
-	return data, nil
-}
-
 func (u *userMysqlRepository) GetUser(param string) (*entities.Users, error) {
 	user := entities.Users{}
-
-	if e := u.DB.DB().First(&user, "username = ?", param).Error; e != nil {
-		return nil, e
+	if err := u.DB.DB().First(&user, "username = ?", param).Error; err != nil {
+		return nil, err
 	}
+
 	return &user, nil
 }
 
-// func (u *userMysqlRepository) FindAll() []entities.Users {
-// 	var users []entities.Users
-// 	u.DB.DB().Find(&users)
+func (u *userMysqlRepository) Register(payload *entities.Users) (*entities.Users, error) {
+	user := fromDomain(*payload)
 
-// 	return users
-// }
+	tx := u.DB.DB().Begin()
+	defer func() {
+		if r := recover(); r != nil {
+		tx.Rollback()
+		}
+	}()
 
-func (u *userMysqlRepository) FindByID(id uint64) (*entities.Users, error) {
-	var user entities.Users
-	err := u.DB.DB().First(&user, id).Error
-	if err != nil {
+	if err := tx.Error; err != nil {
 		return nil, err
 	}
-	return &user, nil
+
+	if err := tx.Create(&user).Error; err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	return user.toDomain(), tx.Commit().Error
 }
 
 func (u *userMysqlRepository) FindByEmail(email string) *entities.Users {
-	var user entities.Users
+	user := entities.Users{}
 	u.DB.DB().Where("email = ?", email).First(&user)
 
 	return &user
 }
+
+// func (u *userMysqlRepository) Account(payload *entities.Users) (*entities.Users, error) {
+	
+// }
+
+// func (u *userMysqlRepository) Address(payload *entities.Users) (*entities.Users, error) {
+	
+// }

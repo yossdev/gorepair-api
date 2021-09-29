@@ -3,17 +3,25 @@ package dto
 import "gorepair-rest-api/src/users/entities"
 
 type UserRequestLoginBody struct {
-	Email    string `json:"email" form:"email"`
-	Password string `json:"password" form:"password"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type UserRequestRegisterBody struct {
-	Username string `json:"username" form:"username" validate:"required"`
-	Name     string `json:"name" form:"name" validate:"required"`
-	Email    string `json:"email" form:"email" validate:"required"`
-	Password string `json:"password" form:"password" validate:"required"`
-	Phone    string `json:"phone" form:"phone" validate:"required"`
+	Username string `json:"username" validate:"required"`
+	Name     string `json:"name" validate:"required"`
+	Email    string `json:"email" validate:"required"`
+	Password string `json:"password" validate:"required"`
+	Phone    string `json:"phone" validate:"required"`
 }
+
+// type UserRequestAddressBody struct {
+// 	Username string `json:"username" validate:"required"`
+// 	Name     string `json:"name" validate:"required"`
+// 	Email    string `json:"email" validate:"required"`
+// 	Password string `json:"password" validate:"required"`
+// 	Phone    string `json:"phone" validate:"required"`
+// }
 
 func (req *UserRequestLoginBody) ToDomain() *entities.Users {
 	return &entities.Users{
