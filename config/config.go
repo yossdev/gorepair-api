@@ -1,81 +1,87 @@
 package config
 
 import (
-	"context"
-	"fmt"
-	"gorepair-rest-api/models/tables"
-	"log"
+	"sync"
+	"time"
 
 	"github.com/spf13/viper"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
 )
 
-func LoadConfig() {
-	viper.SetConfigFile(`app.env`)
+var config appConfigStruct
+var doOnce sync.Once
 
-	viper.AutomaticEnv()
+type appConfigStruct struct {
+	AppPort 			string
+	AppKey  			string // all off local encryption will use this key
+	LogPath 			string
+	// MySql database config
+	DbHost     			string
+	DbPort     			string
+	DbName     			string
+	DbUsername 			string
+	DbPassword 			string
+	// MongoDB
+	MongoDb_Address	   	string
+	MongoDb_Name 	   	string
+	MongoDb_Collection 	string
+	MongoDb_Username 	string
+	MongoDb_Password 	string
+	// key
+	PrivateKey 			string
+	PublicKey  			string
+	// jwt
+	JwtTokenType      	string
+	JwtTokenExpired   	time.Duration // in second
+	JwtRefreshExpired 	time.Duration // in second
+}
 
-	err := viper.ReadInConfig()
-	if err != nil {
-		log.Fatalln("Cannot load config", err)
+func init() {
+	doOnce.Do(func() {
+		viper.SetConfigFile(`.env`)
+		viper.AutomaticEnv()
+		err := viper.ReadInConfig()
+		if err != nil {
+			panic(err)
+		}
+
+		config = load()
+	})
+}
+
+func load() appConfigStruct {
+
+	jwtTokenExp := viper.GetString("JWT_TOKEN_EXPIRED")
+	jwtRefreshExp := viper.GetString("JWT_REFRESH_EXPIRED")
+
+	jwtTokenDuration, _ := time.ParseDuration(jwtTokenExp)
+	jwtRefreshDuration, _ := time.ParseDuration(jwtRefreshExp)
+
+	return appConfigStruct{
+		AppPort: 			viper.GetString("APP_PORT"),
+		AppKey:  			viper.GetString("APP_KEY"),
+		LogPath: 			viper.GetString("LOG_PATH"),
+		// db configure
+		DbHost:     		viper.GetString("DB_HOST"),
+		DbPort:     		viper.GetString("DB_PORT"),
+		DbName:     		viper.GetString("DB_NAME"),
+		DbUsername: 		viper.GetString("DB_USERNAME"),
+		DbPassword: 		viper.GetString("DB_PASSWORD"),
+		// MongoDB
+		MongoDb_Address:	viper.GetString("MongoDb_Address"),
+		MongoDb_Name: 		viper.GetString("MongoDb_Name"),
+		MongoDb_Collection: viper.GetString("MongoDb_Collection"),
+		MongoDb_Username: 	viper.GetString("MongoDb_Username"),
+		MongoDb_Password: 	viper.GetString("MongoDb_Password"),
+		// key
+		PrivateKey: 		viper.GetString("PRIVATE_KEY"),
+		PublicKey:  		viper.GetString("PUBLIC_KEY"),
+		// Jwt Configuration
+		JwtTokenType:      	"Bearer",
+		JwtTokenExpired:   	jwtTokenDuration,   // in second
+		JwtRefreshExpired: 	jwtRefreshDuration, // in second
 	}
 }
 
-// Database
-var DB *gorm.DB
-
-func InitDB() {
-	// connect to DB
-	dsn := fmt.Sprintf(
-		"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		viper.GetString(`DB_USER`),
-		viper.GetString(`DB_PASSWORD`),
-		viper.GetString(`DB_HOST`),
-		viper.GetString(`DB_PORT`),
-		viper.GetString(`DB_NAME`),
-	)
-	var err error
-	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	if err != nil {
-		panic("Connection DB Failed")
-	}
-	InitMigration()
-}
-
-func InitMigration() {
-	DB.AutoMigrate(
-		&tables.User{},
-		&tables.UserAddress{},
-		&tables.Workshop{},
-		&tables.WorkshopAddress{},
-		&tables.Description{},
-		&tables.Service{},
-		&tables.Order{},
-		&tables.OrderStatus{},
-		&tables.Rating{},
-	)
-}
-
-// MongoDB for saving data log
-var Client *mongo.Client
-
-func InitMongo() {
-	// Set client options
-	clientOptions := options.Client().ApplyURI(viper.GetString(`MongoDB`))
-	
-	// Connect to MongoDB
-	var e error
-	Client, e = mongo.Connect(context.TODO(), clientOptions)
-	if e != nil {
-        log.Fatalln(e)
-    }
-	
-	// Check the connection
-	e = Client.Ping(context.TODO(), nil)
-	if e != nil {
-        log.Fatalln(e)
-    }
+func Get() appConfigStruct {
+	return config
 }
