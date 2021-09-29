@@ -29,7 +29,6 @@ func NewHttpHandler(userService entities.Service) UserHandlers {
 }
 
 func (service *userHandlers) Register(ctx *fiber.Ctx) error {
-
 	userData := new(dto.UserRequestRegisterBody)
 	if err := ctx.BodyParser(userData); err != nil {
 		return web.JsonResponse(ctx, http.StatusBadRequest, "something is not right", nil)
@@ -40,10 +39,6 @@ func (service *userHandlers) Register(ctx *fiber.Ctx) error {
 	}
 
 	user, err := service.UserService.Register(userData.ToDomain())
-
-	if user == nil {
-		return web.JsonResponse(ctx, http.StatusUnprocessableEntity, "can't process, check your inputs again!", nil)
-	}
 
 	if err != nil {
 		return web.JsonResponse(ctx, http.StatusInternalServerError, "User already exist", nil)

@@ -61,9 +61,6 @@ func (u *logMongo) LogReqRes(ctx *fiber.Ctx) error {
 	//save log to mongo db
 	go func() {
 		session := u.DB.DB().Database(config.Get().MongoDb_Name).Collection(config.Get().MongoDb_Collection)
-
-		// session := db.NewMongoClient().DB().Database(config.Get().MongoDb_Name).Collection(config.Get().MongoDb_Collection)
-
 		_, err := session.InsertOne(context.TODO(), data)
 		if err != nil {
 			logger.Log.Infoln("Failed to save logResReq to mongo, with err: ", err)
