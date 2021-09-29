@@ -11,7 +11,6 @@ var config appConfigStruct
 var doOnce sync.Once
 
 type appConfigStruct struct {
-	Timeout				time.Duration
 	AppPort 			string
 	AppKey  			string // all off local encryption will use this key
 	LogPath 			string
@@ -58,7 +57,6 @@ func load() appConfigStruct {
 	jwtRefreshDuration, _ := time.ParseDuration(jwtRefreshExp)
 
 	return appConfigStruct{
-		Timeout: 			time.Duration(2 * time.Second),
 		AppPort: 			viper.GetString("APP_PORT"),
 		AppKey:  			viper.GetString("APP_KEY"),
 		LogPath: 			viper.GetString("LOG_PATH"),

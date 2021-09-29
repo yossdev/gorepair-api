@@ -44,7 +44,7 @@ func NewMysqlClient() MysqlDB {
 		return nil
 	}
 
-	log.Println("Connected to MySql!")
+	// log.Println("Connected to MySql!")
 
 	return &mysqlDB{
 		db: db,
