@@ -39,6 +39,7 @@ func (c *RouterStruct) GetRoutes() {
 	}
 
 	// registering route from another modules
+	// User Route
 	userRouterStruct := _userRoute.RouterStruct {
 		RouterStruct: webRouterConfig,
 	}

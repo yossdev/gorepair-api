@@ -1,6 +1,6 @@
 package entities
 
-import "gorepair-rest-api/internal/utils/auth"
+import "gorm.io/datatypes"
 
 type Users struct {
 	ID       uint64
@@ -8,6 +8,8 @@ type Users struct {
 	Email    string
 	Password string
 	Name     string
+	Gender   string
+	DOB      datatypes.Date
 	Phone    string
 }
 
@@ -22,18 +24,19 @@ type UserAddress struct {
 	Province       string
 }
 
-type Service interface {
-	FindByID(id uint64) (*Users, error)
+type UserService interface {
 	GetUser(username string) (*Users, error)
-	Register(data *Users) (*Users, error)
-	Login(data *Users) (auth.TokenStruct, error)
-	RefreshToken(id string) (auth.TokenStruct, error)
+	Register(payload *Users) (*Users, error)
+	Login(payload *Users) (interface{}, error)
+	// Logout() error
+	// Account(payload *Users) (*Users, error)
+	// Address(payload *Users) (*Users, error)
 }
 
-type Repository interface {
-	// FindAll() []Users
-	FindByID(id uint64) (*Users, error)
-	FindByEmail(email string) *Users
+type UserRepository interface {
 	GetUser(username string) (*Users, error)
-	Register(data *Users) (*Users, error)
+	Register(payload *Users) (*Users, error)
+	FindByEmail(email string) *Users
+	// Account(payload *Users) (*Users, error)
+	// Address(payload *Users) (*Users, error)
 }
