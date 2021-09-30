@@ -17,9 +17,13 @@ import (
 func dbMigrate(db *gorm.DB) {
 	db.AutoMigrate(
 		&repositories.User{},
+		&repositories.UserAddress{},
 	)
 }
 
+// @title API
+// @version 1.0
+// @BasePath /api
 func main() {
 
 	app := fiber.New()
@@ -33,8 +37,6 @@ func main() {
 	scribleDB := local_db.NewScribleClient()
 	mongoDB := db.NewMongoClient()
 
-
-
 	routeStruct := routes.RouterStruct{
 		RouterStruct: web.RouterStruct{
 			Web:       app,
@@ -45,7 +47,8 @@ func main() {
 	}
 	router := routes.NewHttpRoute(routeStruct)
 	router.GetRoutes()
+
 	_s.StartServer(app)
-	_s.StartServerWithGracefulShutdown(app)
+	// _s.StartServerWithGracefulShutdown(app)
 
 }

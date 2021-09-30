@@ -2,60 +2,42 @@ package services
 
 import (
 	"database/sql"
-	"gorepair-rest-api/infrastructures/third-party/freegeoapi"
+	"errors"
 	"gorepair-rest-api/internal/utils/auth"
 	"gorepair-rest-api/internal/utils/helper"
 	"gorepair-rest-api/src/users/entities"
-	"gorepair-rest-api/src/users/repositories"
 	"time"
 
+	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type userService struct {
-	userMysqlRepository   entities.Repository
-	userScribleRepository repositories.UserScribleRepositoryInterface
+	userMysqlRepository   entities.UserRepository
+	userScribleRepository entities.UserScribleRepositoryInterface
 	jwtAuth               auth.JwtTokenInterface
 }
 
 func NewUserService(
-	userMysqlRepository entities.Repository,
+	userMysqlRepository entities.UserRepository,	
 	jwtAuth auth.JwtTokenInterface,
-	userScribleRepository repositories.UserScribleRepositoryInterface,
-) entities.Service {
+	userScribleRepository entities.UserScribleRepositoryInterface,
+) entities.UserService {
 	return &userService{
-		userScribleRepository: userScribleRepository,
 		userMysqlRepository:   userMysqlRepository,
+		userScribleRepository:  userScribleRepository,
 		jwtAuth:               jwtAuth,
+		
 	}
 }
 
-func (c *userService) Register(data *entities.Users) (*entities.Users, error) {
-	data.Password, _ = helper.Hash(data.Password)
-	user, err := c.userMysqlRepository.Register(data)
-	return user, err
-}
-
-func (c *userService) Login(data *entities.Users) (auth.TokenStruct, error) {
-	user := c.userMysqlRepository.FindByEmail(data.Email)
-	if user.ID == 0 {
-		return auth.TokenStruct{}, sql.ErrNoRows
-	}
-
-	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(data.Password))
+func (c *userService) FindByID(id string) error {
+	err := c.userScribleRepository.FindUserRefreshToken(id)
 	if err != nil {
-		return auth.TokenStruct{}, err
+		return err
 	}
-
-	loc, _ := freegeoapi.NewIpAPI().GetLocationByIP()
-
-	userToken := c.jwtAuth.Sign(jwt.MapClaims{
-		"id": user.ID,
-		"cty": loc.City,
-	})
-
-	return userToken, nil
+	return nil
 }
 
 func (c *userService) GetUser(username string) (*entities.Users, error) {
@@ -63,30 +45,50 @@ func (c *userService) GetUser(username string) (*entities.Users, error) {
 	return user, err
 }
 
-func (c *userService) FindByID(id uint64) (*entities.Users, error) {
-	res, err := c.userMysqlRepository.FindByID(id)
+func (c *userService) Register(payload *entities.Users) (*entities.Users, error) {
+	payload.Password, _ = helper.Hash(payload.Password)
+	user, err := c.userMysqlRepository.Register(payload)
+	return user, err
+}
+
+func (c *userService) Login(payload *entities.Users) (interface{}, error) {
+	user := c.userMysqlRepository.FindByEmail(payload.Email)
+	if user.ID == 0 {
+		return nil, sql.ErrNoRows
+	}
+
+	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(payload.Password))
 	if err != nil {
 		return nil, err
 	}
-	return res, nil
-}
 
-func (c *userService) RefreshToken(id string) (auth.TokenStruct, error) {
-	refreshToken, err := c.userScribleRepository.FindUserRefreshToken(id)
-	if err != nil {
-		return auth.TokenStruct{}, err
-	}
-
-	if refreshToken.Expired < time.Now().Unix() {
-		return auth.TokenStruct{}, err
-	}
-
-	loc, _ := freegeoapi.NewIpAPI().GetLocationByIP()
-
-	userToken := c.jwtAuth.Sign(jwt.MapClaims{
-		"id": id,
-		"cty": loc.City,
+	token := c.jwtAuth.Sign(jwt.MapClaims{
+		"id": user.ID,
+		"role": "user",
 	})
 
-	return userToken, nil
+	return token, nil
+}
+
+func (c *userService) Logout(ctx *fiber.Ctx, id string) error {
+	role := helper.Restricted(ctx)
+	if id == ctx.Get("id") && role == "user" {
+		err := c.userScribleRepository.DeleteUserRefreshToken(id)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	return errors.New("unauthorized")
+}
+
+func (c *userService) UpdateAccount(payload *entities.Users, id string) (*entities.Users, error) {
+	payload.Password, _ = helper.Hash(payload.Password)
+	payload.UpdatedAt = time.Now()
+	user, err := c.userMysqlRepository.UpdateAccount(payload, id)
+	if err != nil {
+		return user, err
+	}
+	return user, nil
 }

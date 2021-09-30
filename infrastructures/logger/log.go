@@ -24,7 +24,7 @@ func newLogger() *logrus.Logger {
 	Log := logrus.New()
 	log.Println("Setup Logger")
 	if config.Get().LogPath != "" {
-		err := os.Mkdir(config.Get().LogPath, 0755)
+		err := os.Mkdir("./temp/logger", 0755)
 		if err != nil {
 			log.Println("Failed to create log path")
 		}

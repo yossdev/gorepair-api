@@ -40,5 +40,5 @@ func (ipl *IpAPI) GetLocationByIP() (_ipgeo.Domain, error) {
 		return _ipgeo.Domain{}, err
 	}
 
-	return payload.ToDomain(), err
+	return payload.toDomain(), err
 }

@@ -5,25 +5,28 @@ import (
 	"gorepair-rest-api/src/users/entities"
 )
 
-type UserScribleRepositoryInterface interface {
-	FindUserRefreshToken(id string) (entities.UserRefreshToken, error)
-}
-
 type userScribleRepository struct {
 	scribleDB local_db.ScribleDB
 }
 
-func NewUserScribleRepositoryInterface(scribleDB local_db.ScribleDB) UserScribleRepositoryInterface {
+func NewUserScribleRepositoryInterface(scribleDB local_db.ScribleDB) entities.UserScribleRepositoryInterface {
 	return &userScribleRepository{
 		scribleDB: scribleDB,
 	}
 }
 
-func (c userScribleRepository) FindUserRefreshToken(id string) (entities.UserRefreshToken, error) {
-	var userRefreshToken entities.UserRefreshToken
-	err := c.scribleDB.DB().Read("refresh_token", id, &userRefreshToken)
+func (c userScribleRepository) FindUserRefreshToken(userID string) error {
+	err := c.scribleDB.DB().Read("refresh_token_user", userID, nil)
 	if err != nil {
-		return entities.UserRefreshToken{}, err
+		return err
 	}
-	return userRefreshToken, nil
+	return nil
+}
+
+func (c userScribleRepository) DeleteUserRefreshToken(userID string) error {
+	err := c.scribleDB.DB().Delete("refresh_token_user", userID)
+	if err != nil {
+		return err
+	}
+	return nil
 }

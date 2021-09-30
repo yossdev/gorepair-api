@@ -1,14 +1,22 @@
 package entities
 
-import "gorepair-rest-api/internal/utils/auth"
+import (
+	"time"
+
+	"github.com/gofiber/fiber/v2"
+)
 
 type Users struct {
-	ID       uint64
-	Username string
-	Email    string
-	Password string
-	Name     string
-	Phone    string
+	ID       	uint64
+	Username 	string
+	Email    	string
+	Password 	string
+	Name     	string
+	Gender   	string
+	DOB 		time.Time
+	Phone    	string
+	Address 	UserAddress
+	UpdatedAt   time.Time
 }
 
 type UserAddress struct {
@@ -22,18 +30,23 @@ type UserAddress struct {
 	Province       string
 }
 
-type Service interface {
-	FindByID(id uint64) (*Users, error)
+type UserService interface {
+	FindByID(id string) error
 	GetUser(username string) (*Users, error)
-	Register(data *Users) (*Users, error)
-	Login(data *Users) (auth.TokenStruct, error)
-	RefreshToken(id string) (auth.TokenStruct, error)
+	Register(payload *Users) (*Users, error)
+	Login(payload *Users) (interface{}, error)
+	Logout(ctx *fiber.Ctx, id string) error
+	UpdateAccount(payload *Users, id string) (*Users, error)
 }
 
-type Repository interface {
-	// FindAll() []Users
-	FindByID(id uint64) (*Users, error)
-	FindByEmail(email string) *Users
+type UserRepository interface {
 	GetUser(username string) (*Users, error)
-	Register(data *Users) (*Users, error)
+	Register(payload *Users) (*Users, error)
+	FindByEmail(email string) *Users
+	UpdateAccount(payload *Users, id string) (*Users, error)
+}
+
+type UserScribleRepositoryInterface interface {
+	FindUserRefreshToken(userID string) error
+	DeleteUserRefreshToken(userID string) error
 }

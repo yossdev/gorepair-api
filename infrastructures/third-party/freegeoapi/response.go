@@ -16,7 +16,7 @@ type Response struct {
 	MetroCode   int     `json:"metro_code"`
 }
 
-func (resp *Response) ToDomain() _ipgeo.Domain {
+func (resp *Response) toDomain() _ipgeo.Domain {
 	return _ipgeo.Domain{
 		IP: 			resp.IP,
 		City: 			resp.City,

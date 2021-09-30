@@ -7,16 +7,16 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-func ValidateInputs(dataSet interface{}) (bool, map[string]string) {
+func ValidateInputs(payload interface{}) (bool, map[string]string) {
 
 	validate := validator.New()
 
-	err := validate.Struct(dataSet)
+	err := validate.Struct(payload)
 
 	if err != nil {
 		errors := make(map[string]string)
 
-		reflected := reflect.ValueOf(dataSet)
+		reflected := reflect.ValueOf(payload)
 		
 		for _, err := range err.(validator.ValidationErrors) {
 
