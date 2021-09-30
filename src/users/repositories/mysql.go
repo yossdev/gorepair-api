@@ -16,47 +16,36 @@ func NewUserMysqlRepository(DB db.MysqlDB) entities.UserRepository {
 }
 
 func (u *userMysqlRepository) GetUser(param string) (*entities.Users, error) {
-	user := entities.Users{}
+	user := User{}
 	if err := u.DB.DB().First(&user, "username = ?", param).Error; err != nil {
 		return nil, err
 	}
 
-	return &user, nil
+	return user.toDomain(), nil
 }
 
 func (u *userMysqlRepository) Register(payload *entities.Users) (*entities.Users, error) {
 	user := fromDomain(*payload)
-
-	tx := u.DB.DB().Begin()
-	defer func() {
-		if r := recover(); r != nil {
-		tx.Rollback()
-		}
-	}()
-
-	if err := tx.Error; err != nil {
-		return nil, err
+	e := u.DB.DB().Create(&user)
+	if e.Error != nil {
+		return nil, e.Error
 	}
 
-	if err := tx.Create(&user).Error; err != nil {
-		tx.Rollback()
-		return nil, err
-	}
-
-	return user.toDomain(), tx.Commit().Error
+	return user.toDomain(), nil
 }
 
 func (u *userMysqlRepository) FindByEmail(email string) *entities.Users {
-	user := entities.Users{}
+	user := User{}
 	u.DB.DB().Where("email = ?", email).First(&user)
 
-	return &user
+	return user.toDomain()
 }
 
-// func (u *userMysqlRepository) Account(payload *entities.Users) (*entities.Users, error) {
-	
-// }
+func (u *userMysqlRepository) UpdateAccount(payload *entities.Users, id string) (*entities.Users, error) {
+	res := u.DB.DB().Save(*payload)
+	if res.Error != nil {
+		return nil, res.Error
+	}
 
-// func (u *userMysqlRepository) Address(payload *entities.Users) (*entities.Users, error) {
-	
-// }
+	return payload, nil
+}

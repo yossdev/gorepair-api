@@ -1,0 +1,16 @@
+# Files
+.dockerignore
+.gitignore
+.env.example
+.env.test
+Docker-compose.yaml
+Dockerfile
+Makefile
+**/*.md
+**/*_test.go
+
+# Folders
+.git/
+.github/
+build/
+temp/

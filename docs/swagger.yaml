@@ -34,10 +34,10 @@ paths:
                     type: integer
                   message:
                     type: string
-                  token:
-                    type: string
-        "400":
-          description: Invalid username/password supplied
+                  data:
+                    type: object
+        "401":
+          description: Unauthorized
       requestBody:
         content:
           application/json:
@@ -52,14 +52,22 @@ paths:
                 password:
                   type: string
         required: true
-  /user/logout:
+  /user/{username}/logout:
     get:
       tags:
         - user
-      summary: Operation for getting user details by username
+      summary: Operation for getting user logout
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         default:
           description: successful operation
+        "401":
+          description: Unauthorized
   /user/register:
     post:
       tags:
@@ -81,26 +89,8 @@ paths:
                     type: object
         "400":
           description: Bad Request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                  message:
-                    type: string
         "500":
           description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                  message:
-                    type: string
       requestBody:
         content:
           application/json:
@@ -149,10 +139,10 @@ paths:
                     type: string
                   data:
                     type: object
-        "400":
-          description: Invalid username supplied
+        "401":
+          description: Unauthorized
         "404":
-          description: User not found
+          description: Not found
   /user/{username}/account:
     put:
       tags:
@@ -178,17 +168,10 @@ paths:
                     type: string
                   data:
                     type: object
+        "400":
+          description: Bad Request
         "500":
-          description: Internal Serve Error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                  message:
-                    type: string
+          description: Unauthorized
       requestBody:
         content:
           application/json:
@@ -218,7 +201,7 @@ paths:
                 phone:
                   type: string
         required: true
-  /user/{username}/address:
+  /user/{username}/address/update:
     put:
       tags:
         - user
@@ -245,15 +228,6 @@ paths:
                     type: object
         "500":
           description: Internal Serve Error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                  message:
-                    type: string
       requestBody:
         content:
           application/json:
@@ -280,6 +254,35 @@ paths:
                 postal_code:
                   type: string
         required: true
+  /user/{username}/address:
+    get:
+      tags:
+        - user
+      summary: Get user address
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  message:
+                    type: string
+                  data:
+                    type: object
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
 
   # ORDER ROUTES
   /order:
@@ -526,11 +529,17 @@ paths:
                 password:
                   type: string
         required: true
-  /workshop/logout:
+  /workshop/{username}/logout:
     get:
       tags:
         - workshop
       summary: Operation for getting workshop details by username
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         default:
           description: successful operation
@@ -797,7 +806,7 @@ paths:
         required: true
 
   # SERVICES ROUTE FOR WORKSHOP
-  /services:
+  /services/new:
     post:
       tags:
         - services
@@ -946,7 +955,26 @@ paths:
           description: Invalid ID supplied
         "404":
           description: Services not found
-  /services/search?q=:
+  /services:
+    get:
+      tags:
+        - services
+      summary: Show all services
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  message:
+                    type: string
+                  data:
+                    type: object
+  /services/search:
     get:
       tags:
         - services
