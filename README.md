@@ -4,18 +4,29 @@ Final backend project alterra academy kampus merdeka.
 
 ## MVP
 
-- [] Mendaftar atau membuat akun pengguna atau pengusaha bengkel
-- [] Menambah atau mengubah informasi bengkel (lokasi bengkel, jenis layanan, biaya layanan, jam operasional)
-- [] Menambah atau mengubah informasi pengguna (lokasi pengambilan atau pengantaran kendaraan)
-- [] Mendapatkan list bengkel (berdasarkan IP geolocation) dan informasi bengkel yang dipilih
-- [] Membuat transaksi order service on-site atau penjemputan kendaraan
-- [] Melihat status order (placed, on process, ready to take)
-- [] Membatalkan atau menghapus transaksi
-- [] Rating ke pengguna atau ke bengkel
+<!-- &check; - html checkbox example -->
+
+<!-- :white_check_mark: - emoji checkbox example -->
+
+- [ ] Mendaftar atau membuat akun pengguna atau pengusaha bengkel
+
+- [ ] Menambah atau mengubah informasi bengkel (lokasi bengkel, jenis layanan, biaya layanan, jam operasional)
+
+- [ ] Menambah atau mengubah informasi pengguna (lokasi pengambilan atau pengantaran kendaraan)
+
+- [ ] Mendapatkan list bengkel (berdasarkan IP geolocation) dan informasi bengkel yang dipilih
+
+- [ ] Membuat transaksi order service on-site atau penjemputan kendaraan
+
+- [ ] Melihat status order (placed, on process, ready to take)
+
+- [ ] Membatalkan atau menghapus transaksi
+
+- [ ] Rating ke pengguna atau ke bengkel
 
 ## API Server technology stack is
 
-- Server code: **golang**
+- Server code: **go1.17.1**
 - REST Server: [**fiber v2**](https://docs.gofiber.io/)
 - Database: **MySQL**, **MongoDB**
 - ORM: [**gorm v2**](https://gorm.io/docs/)
@@ -23,7 +34,6 @@ Final backend project alterra academy kampus merdeka.
 ## Public API used
 
 - [Free IP Geolocation API](https://freegeoip.app/)
-- [Real Email](https://isitarealemail.com/)
 
 ## Other technology
 

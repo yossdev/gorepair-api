@@ -27,7 +27,7 @@ func (c *RouterStruct) GetRoutes() {
 	c.Web.Use(logger.New(), cors.New())
 	c.Web.Use(middleware.NewLogMongo(c.MongoDB).LogReqRes)
 
-	c.Web.Get("/", func(c *fiber.Ctx) error {
+	c.Web.Get("/api", func(c *fiber.Ctx) error {
 		return web.JsonResponse(c, http.StatusOK, "HOMEPAGE", nil)
 	})
 

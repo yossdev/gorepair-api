@@ -17,9 +17,13 @@ import (
 func dbMigrate(db *gorm.DB) {
 	db.AutoMigrate(
 		&repositories.User{},
+		&repositories.UserAddress{},
 	)
 }
 
+// @title API
+// @version 1.0
+// @BasePath /api
 func main() {
 
 	app := fiber.New()

@@ -1,16 +1,22 @@
 package entities
 
-import "gorm.io/datatypes"
+import (
+	"time"
+
+	"github.com/gofiber/fiber/v2"
+)
 
 type Users struct {
-	ID       uint64
-	Username string
-	Email    string
-	Password string
-	Name     string
-	Gender   string
-	DOB      datatypes.Date
-	Phone    string
+	ID       	uint64
+	Username 	string
+	Email    	string
+	Password 	string
+	Name     	string
+	Gender   	string
+	DOB 		time.Time
+	Phone    	string
+	Address 	UserAddress
+	UpdatedAt   time.Time
 }
 
 type UserAddress struct {
@@ -25,18 +31,22 @@ type UserAddress struct {
 }
 
 type UserService interface {
+	FindByID(id string) error
 	GetUser(username string) (*Users, error)
 	Register(payload *Users) (*Users, error)
 	Login(payload *Users) (interface{}, error)
-	// Logout() error
-	// Account(payload *Users) (*Users, error)
-	// Address(payload *Users) (*Users, error)
+	Logout(ctx *fiber.Ctx, id string) error
+	UpdateAccount(payload *Users, id string) (*Users, error)
 }
 
 type UserRepository interface {
 	GetUser(username string) (*Users, error)
 	Register(payload *Users) (*Users, error)
 	FindByEmail(email string) *Users
-	// Account(payload *Users) (*Users, error)
-	// Address(payload *Users) (*Users, error)
+	UpdateAccount(payload *Users, id string) (*Users, error)
+}
+
+type UserScribleRepositoryInterface interface {
+	FindUserRefreshToken(userID string) error
+	DeleteUserRefreshToken(userID string) error
 }
