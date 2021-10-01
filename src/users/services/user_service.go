@@ -19,14 +19,14 @@ type userService struct {
 }
 
 func NewUserService(
-	userMysqlRepository entities.UserRepository,	
-	jwtAuth auth.JwtTokenInterface,
-	userScribleRepository entities.UserScribleRepositoryInterface,
+	userMysqlRepository 	entities.UserRepository,	
+	jwtAuth 				auth.JwtTokenInterface,
+	userScribleRepository 	entities.UserScribleRepositoryInterface,
 ) entities.UserService {
 	return &userService{
-		userMysqlRepository:   userMysqlRepository,
+		userMysqlRepository:   	userMysqlRepository,
 		userScribleRepository:  userScribleRepository,
-		jwtAuth:               jwtAuth,
+		jwtAuth: 				jwtAuth,
 		
 	}
 }
