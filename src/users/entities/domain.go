@@ -40,7 +40,7 @@ type UserService interface {
 	GetAddress(id uint64) (*UserAddress, error)
 }
 
-type UserRepository interface {
+type UserMysqlRepositoryInterface interface {
 	GetUser(username string) (*Users, error)
 	Register(payload *Users, street string) (*Users, error)
 	FindByEmail(email string) *Users

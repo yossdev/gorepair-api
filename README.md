@@ -4,13 +4,15 @@ Final backend project alterra academy kampus merdeka using clean architecture.
 
 ## MVP
 
-- [ ] Mendaftar atau membuat akun pengguna atau pengusaha bengkel
+- [x] Membuat akun pengguna
+
+- [ ] Membuat akun pengusaha bengkel
 
 - [ ] Menambah atau mengubah informasi bengkel (lokasi bengkel, jenis layanan, biaya layanan, jam operasional)
 
 - [x] Menambah atau mengubah informasi pengguna
 
-- [ ] Mendapatkan list bengkel (berdasarkan IP geolocation) dan informasi bengkel yang dipilih
+- [ ] Mendapatkan list bengkel (berdasarkan IP geolocation) dan informasi bengkel yang dipilih pengguna
 
 - [ ] Membuat transaksi order service on-site atau penjemputan kendaraan
 
@@ -41,3 +43,4 @@ Final backend project alterra academy kampus merdeka using clean architecture.
 - [scribbleDB](https://github.com/nanobox-io/golang-scribble) for local_db (cache jwt)
 - [viper](https://github.com/spf13/viper)
 - [Docker](https://www.docker.com/)
+- [mockery](https://github.com/vektra/mockery) - Mocking framework

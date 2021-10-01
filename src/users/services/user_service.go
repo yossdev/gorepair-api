@@ -13,13 +13,13 @@ import (
 )
 
 type userService struct {
-	userMysqlRepository   entities.UserRepository
+	userMysqlRepository   entities.UserMysqlRepositoryInterface
 	userScribleRepository entities.UserScribleRepositoryInterface
 	jwtAuth               auth.JwtTokenInterface
 }
 
 func NewUserService(
-	userMysqlRepository 	entities.UserRepository,	
+	userMysqlRepository 	entities.UserMysqlRepositoryInterface,	
 	jwtAuth 				auth.JwtTokenInterface,
 	userScribleRepository 	entities.UserScribleRepositoryInterface,
 ) entities.UserService {
