@@ -1,18 +1,14 @@
 # gorepair-rest-api
 
-Final backend project alterra academy kampus merdeka.
+Final backend project alterra academy kampus merdeka using clean architecture.
 
 ## MVP
-
-<!-- &check; - html checkbox example -->
-
-<!-- :white_check_mark: - emoji checkbox example -->
 
 - [ ] Mendaftar atau membuat akun pengguna atau pengusaha bengkel
 
 - [ ] Menambah atau mengubah informasi bengkel (lokasi bengkel, jenis layanan, biaya layanan, jam operasional)
 
-- [ ] Menambah atau mengubah informasi pengguna (lokasi pengambilan atau pengantaran kendaraan)
+- [x] Menambah atau mengubah informasi pengguna
 
 - [ ] Mendapatkan list bengkel (berdasarkan IP geolocation) dan informasi bengkel yang dipilih
 
@@ -42,4 +38,6 @@ Final backend project alterra academy kampus merdeka.
 - validator v10
 - [logrus](https://pkg.go.dev/github.com/sirupsen/logrus@v1.8.1#section-readme) for logger
 - [rotateFilehook](https://pkg.go.dev/github.com/snowzach/rotatefilehook@v0.0.0-20180327172521-2f64f265f58c#section-readme)
-- [scribbleDB](https://github.com/nanobox-io/golang-scribble) for local_db (save jwt refresh)
+- [scribbleDB](https://github.com/nanobox-io/golang-scribble) for local_db (cache jwt)
+- [viper](https://github.com/spf13/viper)
+- [Docker](https://www.docker.com/)

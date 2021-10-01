@@ -22,12 +22,12 @@ type UserRequestRegisterBody struct {
 }
 
 type UserAddressUpdateBody struct {
-	BuildingNumber string	`json:"building_number"`
-	Street         string	`json:"street"`
-	City           string	`json:"city"`
-	Country        string	`json:"country"`
-	PostalCode     string	`json:"postal_code"`
-	Province       string	`json:"province"`
+	BuildingNumber string	`json:"building_number" validate:"required"`
+	Street         string	`json:"street" validate:"required"`
+	City           string	`json:"city" validate:"required"`
+	Country        string	`json:"country" validate:"required"`
+	PostalCode     string	`json:"postal_code" validate:"required"`
+	Province       string	`json:"province" validate:"required"`
 }
 
 type UserAccountUpdateBody struct {
