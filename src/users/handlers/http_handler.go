@@ -114,6 +114,10 @@ func (service *userHandlers) UpdateAccount(ctx *fiber.Ctx) error {
 		return web.JsonResponse(ctx, http.StatusBadRequest, "something is not right with your request", nil)
 	}
 
+	if ok, _ := helper.ValidateInputs(*account); !ok {
+		return web.JsonResponse(ctx, http.StatusBadRequest, "field cannot be empty", nil)
+	}
+
 	res, err := service.UserService.UpdateAccount(account.ToDomain(), rec.ID)
 	if err != nil {
 		return web.JsonResponse(ctx, http.StatusBadRequest, "problem with db", nil)
@@ -142,6 +146,10 @@ func (service *userHandlers) UpdateAddress(ctx *fiber.Ctx) error {
 	e := ctx.BodyParser(address)
 	if e != nil {
 		return web.JsonResponse(ctx, http.StatusBadRequest, "something is not right with your request", nil)
+	}
+
+	if ok, _ := helper.ValidateInputs(*address); !ok {
+		return web.JsonResponse(ctx, http.StatusBadRequest, "field cannot be empty", nil)
 	}
 
 	res, err := service.UserService.UpdateAddress(address.ToDomain(), rec.ID)
