@@ -29,4 +29,6 @@ func (r *RouterStruct) GetRoute() {
 	v1.Post("/register", userHandlers.Register)
 	v1.Get("/:username", middleware.JwtVerifyRefresh, userHandlers.GetUser)
 	v1.Put("/:username/account", middleware.JwtVerifyRefresh, userHandlers.UpdateAccount)
+	v1.Put("/:username/address/update", middleware.JwtVerifyRefresh, userHandlers.UpdateAddress)
+	v1.Get("/:username/address", middleware.JwtVerifyRefresh, userHandlers.GetAddress)
 }

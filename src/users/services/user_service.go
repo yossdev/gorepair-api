@@ -6,7 +6,6 @@ import (
 	"gorepair-rest-api/internal/utils/auth"
 	"gorepair-rest-api/internal/utils/helper"
 	"gorepair-rest-api/src/users/entities"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt"
@@ -45,9 +44,9 @@ func (c *userService) GetUser(username string) (*entities.Users, error) {
 	return user, err
 }
 
-func (c *userService) Register(payload *entities.Users) (*entities.Users, error) {
+func (c *userService) Register(payload *entities.Users , street string) (*entities.Users, error) {
 	payload.Password, _ = helper.Hash(payload.Password)
-	user, err := c.userMysqlRepository.Register(payload)
+	user, err := c.userMysqlRepository.Register(payload, street)
 	return user, err
 }
 
@@ -83,12 +82,24 @@ func (c *userService) Logout(ctx *fiber.Ctx, id string) error {
 	return errors.New("unauthorized")
 }
 
-func (c *userService) UpdateAccount(payload *entities.Users, id string) (*entities.Users, error) {
+func (c *userService) UpdateAccount(payload *entities.Users, id uint64) (*entities.Users, error) {
 	payload.Password, _ = helper.Hash(payload.Password)
-	payload.UpdatedAt = time.Now()
 	user, err := c.userMysqlRepository.UpdateAccount(payload, id)
 	if err != nil {
 		return user, err
 	}
 	return user, nil
+}
+
+func (c *userService) UpdateAddress(payload *entities.UserAddress, id uint64) (*entities.UserAddress, error) {
+	res, err := c.userMysqlRepository.UpdateAddress(payload, id)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func (c *userService) GetAddress(id uint64) (*entities.UserAddress, error)  {
+	address, err := c.userMysqlRepository.GetAddress(id)
+	return address, err
 }

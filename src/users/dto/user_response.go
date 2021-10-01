@@ -16,17 +16,6 @@ type UserResponseBody struct {
 	Phone    string 	`json:"phone"`
 }
 
-type UserResponseAddressBody struct {
-	ID             string `json:"id"`
-	UserID         string `json:"user_id"`
-	BuildingNumber uint16 `json:"building_number"`
-	Street         string `json:"street"`
-	City           string `json:"city"`
-	Country        string `json:"country"`
-	PostalCode     string `json:"postal_code"`
-	Province       string `json:"province"`
-}
-
 type UserUpdateResponseBody struct {
 	ID       string 	`json:"id"`
 	Username string 	`json:"username"`
@@ -35,6 +24,17 @@ type UserUpdateResponseBody struct {
 	Gender   string 	`json:"gender"`
 	DOB 	 time.Time 	`json:"dob"`
 	Phone    string 	`json:"phone"`
+}
+
+type UserResponseAddressBody struct {
+	ID             string `json:"id"`
+	UserID         string `json:"user_id"`
+	BuildingNumber string `json:"building_number"`
+	Street         string `json:"street"`
+	City           string `json:"city"`
+	Country        string `json:"country"`
+	PostalCode     string `json:"postal_code"`
+	Province       string `json:"province"`
 }
 
 func FromDomain(domain *entities.Users) UserResponseBody {
@@ -61,7 +61,7 @@ func FromDomainUpdate(domain *entities.Users) UserUpdateResponseBody {
 	}
 }
 
-func FromDomainAddressUpdate(domain *entities.UserAddress) UserResponseAddressBody {
+func FromDomainAddress(domain *entities.UserAddress) UserResponseAddressBody {
 	return UserResponseAddressBody{
 		ID: 			fmt.Sprintf("%d", domain.ID),
 		UserID: 		fmt.Sprintf("%d", domain.UserID),
@@ -71,6 +71,5 @@ func FromDomainAddressUpdate(domain *entities.UserAddress) UserResponseAddressBo
 		Country: 		domain.Country,
 		PostalCode: 	domain.PostalCode,
 		Province: 		domain.Province,
-		
 	}
 }
