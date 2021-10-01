@@ -22,8 +22,8 @@ type User struct {
 
 type UserAddress struct {
 	ID             uint64 		`gorm:"primaryKey; autoIncrement"`
-	UserID         uint64
-	BuildingNumber uint16
+	UserID         uint64		`gorm:"unique"`
+	BuildingNumber string
 	Street         string 		`gorm:"size:255"`
 	City           string 		`gorm:"size:50"`
 	Country	       string 		`gorm:"size:125"`
@@ -71,15 +71,21 @@ func (rec *UserAddress) toDomain() *entities.UserAddress {
 	}
 }
 
-// func fromDomainAddress(domain entities.UserAddress) *UserAddress {
-// 	return &UserAddress{
-// 		ID: 			domain.ID,
-// 		UserID: 		domain.UserID,
-// 		BuildingNumber: domain.BuildingNumber,
-// 		Street: 		domain.Street,
-// 		City: 			domain.City,
-// 		Country: 		domain.Country,
-// 		PostalCode: 	domain.PostalCode,
-// 		Province: 		domain.Province,
-// 	}
-// }
+func fromDomainAddress(payload *entities.UserAddress, address *UserAddress) {
+	address.BuildingNumber = payload.BuildingNumber
+	address.Street = payload.Street
+	address.City = payload.City
+	address.Country = payload.Country
+	address.PostalCode = payload.PostalCode
+	address.Province = payload.Province
+}
+
+func fromDomainAccount(payload *entities.Users, account *User) {
+	account.Username = payload.Username
+	account.Email = payload.Email
+	account.Password = payload.Password
+	account.Name = payload.Name
+	account.Gender = payload.Gender
+	account.DOB = payload.DOB
+	account.Phone = payload.Phone
+}
