@@ -18,6 +18,8 @@ type UserHandlers interface {
 	Login(ctx *fiber.Ctx) error
 	Logout(ctx *fiber.Ctx) error
 	UpdateAccount(ctx *fiber.Ctx) error
+	UpdateAddress(ctx *fiber.Ctx) error
+	GetAddress(ctx *fiber.Ctx) error
 }
 
 type userHandlers struct {
@@ -68,7 +70,7 @@ func (service *userHandlers) Register(ctx *fiber.Ctx) error {
 		return web.JsonResponse(ctx, http.StatusBadRequest, "field cannot be empty", nil)
 	}
 
-	user, err := service.UserService.Register(payload.ToDomain())
+	user, err := service.UserService.Register(payload.ToDomain(), payload.Street)
 	if err != nil {
 		return web.JsonResponse(ctx, http.StatusInternalServerError, "user already exist", nil)
 	}
@@ -106,15 +108,62 @@ func (service *userHandlers) UpdateAccount(ctx *fiber.Ctx) error {
 		return web.JsonResponse(ctx, http.StatusUnauthorized, "unauthorized", nil)
 	}
 
-	e := ctx.BodyParser(rec)
+	account := new(dto.UserAccountUpdateBody)
+	e := ctx.BodyParser(account)
 	if e != nil {
-		return web.JsonResponse(ctx, http.StatusBadRequest, "something is not right", nil)
+		return web.JsonResponse(ctx, http.StatusBadRequest, "something is not right with your request", nil)
 	}
 
-	res, err := service.UserService.UpdateAccount(rec, ctx.Get("id"))
+	res, err := service.UserService.UpdateAccount(account.ToDomain(), rec.ID)
 	if err != nil {
-		return web.JsonResponse(ctx, http.StatusBadRequest, "something is not right", nil)
+		return web.JsonResponse(ctx, http.StatusBadRequest, "problem with db", nil)
 	}
 
 	return web.JsonResponse(ctx, http.StatusOK, "successfully updated!", dto.FromDomainUpdate(res))
+}
+
+func (service *userHandlers) UpdateAddress(ctx *fiber.Ctx) error {
+	role := helper.Restricted(ctx)
+	if role != "user" {
+		return web.JsonResponse(ctx, http.StatusUnauthorized, "unauthorized", nil)
+	}
+
+	err := service.UserService.FindByID(ctx.Get("id"))
+	if err != nil {
+		return web.JsonResponse(ctx, http.StatusUnauthorized, "unauthorized", nil)
+	}
+
+	rec, err := service.UserService.GetUser(ctx.Params("username"))
+	if err != nil {
+		return web.JsonResponse(ctx, http.StatusUnauthorized, "unauthorized", nil)
+	}
+
+	address := new(dto.UserAddressUpdateBody)
+	e := ctx.BodyParser(address)
+	if e != nil {
+		return web.JsonResponse(ctx, http.StatusBadRequest, "something is not right with your request", nil)
+	}
+
+	res, err := service.UserService.UpdateAddress(address.ToDomain(), rec.ID)
+	if err != nil {
+		return web.JsonResponse(ctx, http.StatusBadRequest, "problem with db", nil)
+	}
+
+	return web.JsonResponse(ctx, http.StatusOK, "successfully updated!", dto.FromDomainAddress(res)) //TODO
+}
+
+func (service *userHandlers) GetAddress(ctx *fiber.Ctx) error {
+	err := service.UserService.FindByID(ctx.Get("id"))
+	if err != nil {
+		return web.JsonResponse(ctx, http.StatusUnauthorized, "unauthorized", nil)
+	}
+
+	user, err := service.UserService.GetUser(ctx.Params("username"))
+	if err != nil {
+		return web.JsonResponse(ctx, http.StatusOK, "user is not exist", nil)
+	}
+
+	address, _ := service.UserService.GetAddress(user.ID)
+
+	return web.JsonResponse(ctx, http.StatusOK, "success", dto.FromDomainAddress(address))
 }

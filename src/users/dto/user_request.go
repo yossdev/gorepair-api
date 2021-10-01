@@ -21,6 +21,25 @@ type UserRequestRegisterBody struct {
 	Street   string		`json:"street" validate:"required"`
 }
 
+type UserAddressUpdateBody struct {
+	BuildingNumber string	`json:"building_number"`
+	Street         string	`json:"street"`
+	City           string	`json:"city"`
+	Country        string	`json:"country"`
+	PostalCode     string	`json:"postal_code"`
+	Province       string	`json:"province"`
+}
+
+type UserAccountUpdateBody struct {
+	Username string 	`json:"username" validate:"required"`
+	Name     string 	`json:"name" validate:"required"`
+	Email    string 	`json:"email" validate:"required"`
+	Password string 	`json:"password" validate:"required"`
+	Gender   string 	`json:"gender" validate:"required"`
+	DOB   	 time.Time 	`json:"dob" validate:"required"`
+	Phone    string 	`json:"phone" validate:"required"`
+}
+
 func (req *UserRequestLoginBody) ToDomain() *entities.Users {
 	return &entities.Users{
 		Email:    req.Email,
@@ -29,6 +48,29 @@ func (req *UserRequestLoginBody) ToDomain() *entities.Users {
 }
 
 func (req *UserRequestRegisterBody) ToDomain() *entities.Users {
+	return &entities.Users{
+		Username: req.Username,
+		Name:     req.Name,
+		Email:    req.Email,
+		Password: req.Password,
+		Phone:    req.Phone,
+		DOB: 	  req.DOB,
+		Gender:   req.Gender,
+	}
+}
+
+func (req *UserAddressUpdateBody) ToDomain() *entities.UserAddress {
+	return &entities.UserAddress{
+		BuildingNumber: req.BuildingNumber,
+		Street: 		req.Street,
+		City: 			req.City,
+		Country: 		req.Country,
+		PostalCode: 	req.PostalCode,
+		Province: 		req.Province,
+	}
+}
+
+func (req *UserAccountUpdateBody) ToDomain() *entities.Users {
 	return &entities.Users{
 		Username: req.Username,
 		Name:     req.Name,
