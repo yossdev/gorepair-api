@@ -20,7 +20,7 @@ func NewHttpRoute(structs RouterStruct) RouterStruct {
 func (r *RouterStruct) GetRoute() {
 	userMysqlRepo := repositories.NewUserMysqlRepository(r.MysqlDB)
 	userScribleRepo := repositories.NewUserScribleRepositoryInterface(r.ScribleDB)
-	userService := services.NewUserService(userMysqlRepo, r.jwtAuth, userScribleRepo)
+	userService := services.NewUserService(userMysqlRepo, userScribleRepo, r.jwtAuth)
 	userHandlers := handlers.NewHttpHandler(userService)
 
 	v1 := r.Web.Group("/api/v1/user")

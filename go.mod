@@ -11,6 +11,7 @@ require (
 	github.com/sirupsen/logrus v1.8.1
 	github.com/snowzach/rotatefilehook v0.0.0-20180327172521-2f64f265f58c
 	github.com/spf13/viper v1.9.0
+	github.com/stretchr/testify v1.7.0
 	go.mongodb.org/mongo-driver v1.7.2
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
@@ -20,6 +21,7 @@ require (
 
 require (
 	github.com/andybalholm/brotli v1.0.3 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
@@ -35,10 +37,12 @@ require (
 	github.com/mitchellh/mapstructure v1.4.2 // indirect
 	github.com/pelletier/go-toml v1.9.4 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/spf13/afero v1.6.0 // indirect
 	github.com/spf13/cast v1.4.1 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/stretchr/objx v0.1.1 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.30.0 // indirect
@@ -52,4 +56,5 @@ require (
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/ini.v1 v1.63.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
+	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )

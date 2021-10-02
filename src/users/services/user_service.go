@@ -2,26 +2,24 @@ package services
 
 import (
 	"database/sql"
-	"errors"
 	"gorepair-rest-api/internal/utils/auth"
 	"gorepair-rest-api/internal/utils/helper"
 	"gorepair-rest-api/src/users/entities"
 
-	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type userService struct {
-	userMysqlRepository   entities.UserRepository
+	userMysqlRepository   entities.UserMysqlRepositoryInterface
 	userScribleRepository entities.UserScribleRepositoryInterface
 	jwtAuth               auth.JwtTokenInterface
 }
 
 func NewUserService(
-	userMysqlRepository 	entities.UserRepository,	
-	jwtAuth 				auth.JwtTokenInterface,
+	userMysqlRepository 	entities.UserMysqlRepositoryInterface,	
 	userScribleRepository 	entities.UserScribleRepositoryInterface,
+	jwtAuth 				auth.JwtTokenInterface,
 ) entities.UserService {
 	return &userService{
 		userMysqlRepository:   	userMysqlRepository,
@@ -69,17 +67,12 @@ func (c *userService) Login(payload *entities.Users) (interface{}, error) {
 	return token, nil
 }
 
-func (c *userService) Logout(ctx *fiber.Ctx, id string) error {
-	role := helper.Restricted(ctx)
-	if id == ctx.Get("id") && role == "user" {
-		err := c.userScribleRepository.DeleteUserRefreshToken(id)
-		if err != nil {
-			return err
-		}
-		return nil
+func (c *userService) Logout(id string) error {
+	err := c.userScribleRepository.DeleteUserRefreshToken(id)
+	if err != nil {
+		return err
 	}
-
-	return errors.New("unauthorized")
+	return nil
 }
 
 func (c *userService) UpdateAccount(payload *entities.Users, id uint64) (*entities.Users, error) {

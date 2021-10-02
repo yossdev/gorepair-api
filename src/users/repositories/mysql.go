@@ -9,7 +9,7 @@ type userMysqlRepository struct {
 	DB db.MysqlDB
 }
 
-func NewUserMysqlRepository(DB db.MysqlDB) entities.UserRepository {
+func NewUserMysqlRepository(DB db.MysqlDB) entities.UserMysqlRepositoryInterface {
 	return &userMysqlRepository{
 		DB: DB,
 	}
