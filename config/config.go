@@ -33,7 +33,7 @@ type appConfigStruct struct {
 	JwtRefreshExpired 	time.Duration // in second
 }
 
-func Init() {
+func InitConfig() {
 	viper.SetConfigFile(`.env`)
 	viper.AutomaticEnv()
 	err := viper.ReadInConfig()

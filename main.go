@@ -4,6 +4,7 @@ import (
 	"gorepair-rest-api/config"
 	"gorepair-rest-api/infrastructures/db"
 	"gorepair-rest-api/infrastructures/local_db"
+	"gorepair-rest-api/infrastructures/logger"
 	"gorepair-rest-api/internal/routes"
 	_s "gorepair-rest-api/internal/utils/start-server"
 	"gorepair-rest-api/internal/web"
@@ -28,7 +29,8 @@ func main() {
 
 	app := fiber.New()
 
-	config.Init()
+	config.InitConfig()
+	logger.InitLogger()
 
 	appPort := config.Get().AppPort
 	log.Println("Server running on PORT", appPort)

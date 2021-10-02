@@ -25,10 +25,10 @@ func (r *RouterStruct) GetRoute() {
 
 	v1 := r.Web.Group("/api/v1/user")
 	v1.Post("/", userHandlers.Login)
-	v1.Get("/:username/logout", middleware.JwtVerifyRefresh, userHandlers.Logout)
+	v1.Get("/:username/logout", middleware.JwtVerifyRefresh, middleware.UserRestricted, userHandlers.Logout)
 	v1.Post("/register", userHandlers.Register)
 	v1.Get("/:username", middleware.JwtVerifyRefresh, userHandlers.GetUser)
-	v1.Put("/:username/account", middleware.JwtVerifyRefresh, userHandlers.UpdateAccount)
-	v1.Put("/:username/address/update", middleware.JwtVerifyRefresh, userHandlers.UpdateAddress)
+	v1.Put("/:username/account", middleware.JwtVerifyRefresh, middleware.UserRestricted, userHandlers.UpdateAccount)
+	v1.Put("/:username/address/update", middleware.JwtVerifyRefresh, middleware.UserRestricted, userHandlers.UpdateAddress)
 	v1.Get("/:username/address", middleware.JwtVerifyRefresh, userHandlers.GetAddress)
 }

@@ -47,13 +47,13 @@ func (service *userHandlers) Login(ctx *fiber.Ctx) error {
 }
 
 func (service *userHandlers) Logout(ctx *fiber.Ctx) error {
-	user, err := service.UserService.GetUser(ctx.Params("username"))
+	err := service.UserService.FindByID(ctx.Get("id"))
 	if err != nil {
 		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
 	}
 
-	role := helper.Restricted(ctx)
-	if fmt.Sprintf("%d", user.ID) == ctx.Get("id") && role == "user" {
+	user, err := service.UserService.GetUser(ctx.Params("username"))
+	if err != nil {
 		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
 	}
 
@@ -98,18 +98,13 @@ func (service *userHandlers) GetUser(ctx *fiber.Ctx) error {
 }
 
 func (service *userHandlers) UpdateAccount(ctx *fiber.Ctx) error {
-	role := helper.Restricted(ctx)
-	if role != "user" {
-		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
-	}
-	
-	err := service.UserService.FindByID(ctx.Get("id"))
+	rec, err := service.UserService.GetUser(ctx.Params("username"))
 	if err != nil {
 		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
 	}
 
-	rec, err := service.UserService.GetUser(ctx.Params("username"))
-	if err != nil {
+	ok := service.UserService.FindByID(fmt.Sprintf("%d", rec.ID))
+	if ok != nil {
 		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
 	}
 
@@ -132,18 +127,13 @@ func (service *userHandlers) UpdateAccount(ctx *fiber.Ctx) error {
 }
 
 func (service *userHandlers) UpdateAddress(ctx *fiber.Ctx) error {
-	role := helper.Restricted(ctx)
-	if role != "user" {
-		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
-	}
-
-	err := service.UserService.FindByID(ctx.Get("id"))
-	if err != nil {
-		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
-	}
-
 	rec, err := service.UserService.GetUser(ctx.Params("username"))
 	if err != nil {
+		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
+	}
+
+	ok := service.UserService.FindByID(fmt.Sprintf("%d", rec.ID))
+	if ok != nil {
 		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
 	}
 
@@ -166,14 +156,14 @@ func (service *userHandlers) UpdateAddress(ctx *fiber.Ctx) error {
 }
 
 func (service *userHandlers) GetAddress(ctx *fiber.Ctx) error {
-	err := service.UserService.FindByID(ctx.Get("id"))
-	if err != nil {
-		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
-	}
-
 	user, err := service.UserService.GetUser(ctx.Params("username"))
 	if err != nil {
 		return web.JsonResponse(ctx, http.StatusOK, "user is not exist", nil)
+	}
+
+	ok := service.UserService.FindByID(fmt.Sprintf("%d", user.ID))
+	if ok != nil {
+		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
 	}
 
 	address, _ := service.UserService.GetAddress(user.ID)
