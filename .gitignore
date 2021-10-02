@@ -1,3 +1,10 @@
+# Environment variables
 .env
 .env.test
+
+# Test
+*.out
+
+# Dev build
+build/
 temp/

@@ -6,11 +6,11 @@ Final backend project alterra academy kampus merdeka using clean architecture.
 
 - [x] Membuat akun pengguna
 
+- [x] Menambah atau mengubah informasi pengguna
+
 - [ ] Membuat akun pengusaha bengkel
 
 - [ ] Menambah atau mengubah informasi bengkel (lokasi bengkel, jenis layanan, biaya layanan, jam operasional)
-
-- [x] Menambah atau mengubah informasi pengguna
 
 - [ ] Mendapatkan list bengkel (berdasarkan IP geolocation) dan informasi bengkel yang dipilih pengguna
 
@@ -42,5 +42,6 @@ Final backend project alterra academy kampus merdeka using clean architecture.
 - [rotateFilehook](https://pkg.go.dev/github.com/snowzach/rotatefilehook@v0.0.0-20180327172521-2f64f265f58c#section-readme)
 - [scribbleDB](https://github.com/nanobox-io/golang-scribble) for local_db (cache jwt)
 - [viper](https://github.com/spf13/viper)
-- [Docker](https://www.docker.com/)
+- [docker](https://www.docker.com/)
 - [mockery](https://github.com/vektra/mockery) - Mocking framework
+- [testify](https://github.com/stretchr/testify) - Testing toolkit

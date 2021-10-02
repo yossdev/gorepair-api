@@ -1,14 +1,12 @@
 package config
 
 import (
-	"sync"
 	"time"
 
 	"github.com/spf13/viper"
 )
 
 var config appConfigStruct
-var doOnce sync.Once
 
 type appConfigStruct struct {
 	AppPort 			string
@@ -35,17 +33,15 @@ type appConfigStruct struct {
 	JwtRefreshExpired 	time.Duration // in second
 }
 
-func init() {
-	doOnce.Do(func() {
-		viper.SetConfigFile(`.env`)
-		viper.AutomaticEnv()
-		err := viper.ReadInConfig()
-		if err != nil {
-			panic(err)
-		}
+func Init() {
+	viper.SetConfigFile(`.env`)
+	viper.AutomaticEnv()
+	err := viper.ReadInConfig()
+	if err != nil {
+		panic(err)
+	}
 
-		config = load()
-	})
+	config = load()
 }
 
 func load() appConfigStruct {
