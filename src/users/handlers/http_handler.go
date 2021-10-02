@@ -49,12 +49,17 @@ func (service *userHandlers) Login(ctx *fiber.Ctx) error {
 func (service *userHandlers) Logout(ctx *fiber.Ctx) error {
 	user, err := service.UserService.GetUser(ctx.Params("username"))
 	if err != nil {
-		return web.JsonResponse(ctx, http.StatusUnauthorized, "unauthorized", nil)
+		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
 	}
 
-	e := service.UserService.Logout(ctx, fmt.Sprintf("%d", user.ID))
+	role := helper.Restricted(ctx)
+	if fmt.Sprintf("%d", user.ID) == ctx.Get("id") && role == "user" {
+		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
+	}
+
+	e := service.UserService.Logout(fmt.Sprintf("%d", user.ID))
 	if e != nil {
-		return web.JsonResponse(ctx, http.StatusUnauthorized, "unauthorized", nil)
+		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
 	}
 
 	return web.JsonResponse(ctx, http.StatusOK, "successfully logged out", nil)
@@ -81,7 +86,7 @@ func (service *userHandlers) Register(ctx *fiber.Ctx) error {
 func (service *userHandlers) GetUser(ctx *fiber.Ctx) error {
 	err := service.UserService.FindByID(ctx.Get("id"))
 	if err != nil {
-		return web.JsonResponse(ctx, http.StatusUnauthorized, "unauthorized", nil)
+		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
 	}
 
 	user, err := service.UserService.GetUser(ctx.Params("username"))
@@ -95,17 +100,17 @@ func (service *userHandlers) GetUser(ctx *fiber.Ctx) error {
 func (service *userHandlers) UpdateAccount(ctx *fiber.Ctx) error {
 	role := helper.Restricted(ctx)
 	if role != "user" {
-		return web.JsonResponse(ctx, http.StatusUnauthorized, "unauthorized", nil)
+		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
 	}
 	
 	err := service.UserService.FindByID(ctx.Get("id"))
 	if err != nil {
-		return web.JsonResponse(ctx, http.StatusUnauthorized, "unauthorized", nil)
+		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
 	}
 
 	rec, err := service.UserService.GetUser(ctx.Params("username"))
 	if err != nil {
-		return web.JsonResponse(ctx, http.StatusUnauthorized, "unauthorized", nil)
+		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
 	}
 
 	account := new(dto.UserAccountUpdateBody)
@@ -129,17 +134,17 @@ func (service *userHandlers) UpdateAccount(ctx *fiber.Ctx) error {
 func (service *userHandlers) UpdateAddress(ctx *fiber.Ctx) error {
 	role := helper.Restricted(ctx)
 	if role != "user" {
-		return web.JsonResponse(ctx, http.StatusUnauthorized, "unauthorized", nil)
+		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
 	}
 
 	err := service.UserService.FindByID(ctx.Get("id"))
 	if err != nil {
-		return web.JsonResponse(ctx, http.StatusUnauthorized, "unauthorized", nil)
+		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
 	}
 
 	rec, err := service.UserService.GetUser(ctx.Params("username"))
 	if err != nil {
-		return web.JsonResponse(ctx, http.StatusUnauthorized, "unauthorized", nil)
+		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
 	}
 
 	address := new(dto.UserAddressUpdateBody)
@@ -163,7 +168,7 @@ func (service *userHandlers) UpdateAddress(ctx *fiber.Ctx) error {
 func (service *userHandlers) GetAddress(ctx *fiber.Ctx) error {
 	err := service.UserService.FindByID(ctx.Get("id"))
 	if err != nil {
-		return web.JsonResponse(ctx, http.StatusUnauthorized, "unauthorized", nil)
+		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
 	}
 
 	user, err := service.UserService.GetUser(ctx.Params("username"))

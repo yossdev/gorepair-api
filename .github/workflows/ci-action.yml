@@ -1,9 +1,9 @@
 name: Testing CI
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, user]
   pull_request:
-    branches: [main, develop]
+    branches: [main, develop, user]
 
 jobs:
   # job 1: unit test

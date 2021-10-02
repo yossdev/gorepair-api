@@ -28,6 +28,8 @@ func main() {
 
 	app := fiber.New()
 
+	config.Init()
+
 	appPort := config.Get().AppPort
 	log.Println("Server running on PORT", appPort)
 

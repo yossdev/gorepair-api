@@ -1,6 +1,7 @@
 # Files
 .dockerignore
 .gitignore
+.env
 .env.example
 .env.test
 Docker-compose.yaml
