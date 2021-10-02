@@ -8,7 +8,8 @@ import (
 	"gorepair-rest-api/internal/routes"
 	_s "gorepair-rest-api/internal/utils/start-server"
 	"gorepair-rest-api/internal/web"
-	"gorepair-rest-api/src/users/repositories"
+	_ur "gorepair-rest-api/src/users/repositories"
+	_wr "gorepair-rest-api/src/workshops/repositories"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
@@ -17,8 +18,12 @@ import (
 
 func dbMigrate(db *gorm.DB) {
 	db.AutoMigrate(
-		&repositories.User{},
-		&repositories.UserAddress{},
+		&_ur.User{},
+		&_ur.UserAddress{},
+		&_wr.Workshop{},
+		&_wr.WorkshopAddress{},
+		// &_wr.Description{},
+		// &_wr.Service{},
 	)
 }
 
