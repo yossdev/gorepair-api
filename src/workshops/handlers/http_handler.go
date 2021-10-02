@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"gorepair-rest-api/internal/utils/helper"
 	"gorepair-rest-api/internal/web"
-	"gorepair-rest-api/src/users/dto"
-	"gorepair-rest-api/src/users/entities"
+	"gorepair-rest-api/src/workshops/dto"
+	"gorepair-rest-api/src/workshops/entities"
 	"log"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-type UserHandlers interface {
-	GetUser(ctx *fiber.Ctx) error
+type WorkshopHandlers interface {
+	GetWorkshop(ctx *fiber.Ctx) error
 	Register(ctx *fiber.Ctx) error
 	Login(ctx *fiber.Ctx) error
 	Logout(ctx *fiber.Ctx) error
@@ -22,23 +22,23 @@ type UserHandlers interface {
 	GetAddress(ctx *fiber.Ctx) error
 }
 
-type userHandlers struct {
-	UserService entities.UserService
+type workshopHandlers struct {
+	WorkshopService entities.WorkshopService
 }
 
-func NewHttpHandler(userService entities.UserService) UserHandlers {
-	return &userHandlers{
-		UserService: userService,
+func NewHttpHandler(workshopService entities.WorkshopService) WorkshopHandlers {
+	return &workshopHandlers{
+		WorkshopService: workshopService,
 	}
 }
 
-func (service *userHandlers) Login(ctx *fiber.Ctx) error {
-	payload := new(dto.UserRequestLoginBody)
+func (service *workshopHandlers) Login(ctx *fiber.Ctx) error {
+	payload := new(dto.WorkshopRequestLoginBody)
 	if err := ctx.BodyParser(payload); err != nil {
 		log.Fatal(err)
 	}
 
-	res, err := service.UserService.Login(payload.ToDomain())
+	res, err := service.WorkshopService.Login(payload.ToDomain())
 	if err != nil {
 		return web.JsonResponse(ctx, http.StatusUnauthorized, "email or password is wrong!", nil)
 	}
@@ -46,18 +46,18 @@ func (service *userHandlers) Login(ctx *fiber.Ctx) error {
 	return web.JsonResponse(ctx, http.StatusOK, "welcome!", res)
 }
 
-func (service *userHandlers) Logout(ctx *fiber.Ctx) error {
-	err := service.UserService.FindByID(ctx.Get("id"))
+func (service *workshopHandlers) Logout(ctx *fiber.Ctx) error {
+	err := service.WorkshopService.FindByID(ctx.Get("id"))
 	if err != nil {
 		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
 	}
 
-	user, err := service.UserService.GetUser(ctx.Params("username"))
+	workshop, err := service.WorkshopService.GetWorkshop(ctx.Params("username"))
 	if err != nil {
 		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
 	}
 
-	e := service.UserService.Logout(fmt.Sprintf("%d", user.ID))
+	e := service.WorkshopService.Logout(fmt.Sprintf("%d", workshop.ID))
 	if e != nil {
 		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
 	}
@@ -65,8 +65,8 @@ func (service *userHandlers) Logout(ctx *fiber.Ctx) error {
 	return web.JsonResponse(ctx, http.StatusOK, "successfully logged out", nil)
 }
 
-func (service *userHandlers) Register(ctx *fiber.Ctx) error {
-	payload := new(dto.UserRequestRegisterBody)
+func (service *workshopHandlers) Register(ctx *fiber.Ctx) error {
+	payload := new(dto.WorkshopRequestRegisterBody)
 	if err := ctx.BodyParser(payload); err != nil {
 		return web.JsonResponse(ctx, http.StatusBadRequest, "something is not right", nil)
 	}
@@ -75,40 +75,40 @@ func (service *userHandlers) Register(ctx *fiber.Ctx) error {
 		return web.JsonResponse(ctx, http.StatusBadRequest, "field cannot be empty", nil)
 	}
 
-	user, err := service.UserService.Register(payload.ToDomain(), payload.Street)
+	workshop, err := service.WorkshopService.Register(payload.ToDomain(), payload.Street)
 	if err != nil {
-		return web.JsonResponse(ctx, http.StatusInternalServerError, "user already exist", nil)
+		return web.JsonResponse(ctx, http.StatusInternalServerError, "workshop already exist", nil)
 	}
 
-	return web.JsonResponse(ctx, http.StatusCreated, "account created!", dto.FromDomain(user))
+	return web.JsonResponse(ctx, http.StatusCreated, "account created!", dto.FromDomain(workshop))
 }
 
-func (service *userHandlers) GetUser(ctx *fiber.Ctx) error {
-	// err := service.UserService.FindByID(ctx.Get("id"))
+func (service *workshopHandlers) GetWorkshop(ctx *fiber.Ctx) error {
+	// err := service.WorkshopService.FindByID(ctx.Get("id"))
 	// if err != nil {
 	// 	return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
 	// }
 
-	user, err := service.UserService.GetUser(ctx.Params("username"))
+	workshop, err := service.WorkshopService.GetWorkshop(ctx.Params("username"))
 	if err != nil {
-		return web.JsonResponse(ctx, http.StatusOK, "user is not exist", nil)
+		return web.JsonResponse(ctx, http.StatusOK, "workshop is not exist", nil)
 	}
 
-	return web.JsonResponse(ctx, http.StatusOK, "success", dto.FromDomain(user))
+	return web.JsonResponse(ctx, http.StatusOK, "success", dto.FromDomain(workshop))
 }
 
-func (service *userHandlers) UpdateAccount(ctx *fiber.Ctx) error {
-	rec, err := service.UserService.GetUser(ctx.Params("username"))
+func (service *workshopHandlers) UpdateAccount(ctx *fiber.Ctx) error {
+	rec, err := service.WorkshopService.GetWorkshop(ctx.Params("username"))
 	if err != nil {
 		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
 	}
 
-	ok := service.UserService.FindByID(fmt.Sprintf("%d", rec.ID))
+	ok := service.WorkshopService.FindByID(fmt.Sprintf("%d", rec.ID))
 	if ok != nil {
 		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
 	}
 
-	account := new(dto.UserAccountUpdateBody)
+	account := new(dto.WorkshopAccountUpdateBody)
 	e := ctx.BodyParser(account)
 	if e != nil {
 		return web.JsonResponse(ctx, http.StatusBadRequest, "something is not right with your request", nil)
@@ -118,7 +118,7 @@ func (service *userHandlers) UpdateAccount(ctx *fiber.Ctx) error {
 		return web.JsonResponse(ctx, http.StatusBadRequest, "field cannot be empty", nil)
 	}
 
-	res, err := service.UserService.UpdateAccount(account.ToDomain(), rec.ID)
+	res, err := service.WorkshopService.UpdateAccount(account.ToDomain(), rec.ID)
 	if err != nil {
 		return web.JsonResponse(ctx, http.StatusBadRequest, "problem with db", nil)
 	}
@@ -126,18 +126,18 @@ func (service *userHandlers) UpdateAccount(ctx *fiber.Ctx) error {
 	return web.JsonResponse(ctx, http.StatusOK, "successfully updated!", dto.FromDomainUpdate(res))
 }
 
-func (service *userHandlers) UpdateAddress(ctx *fiber.Ctx) error {
-	rec, err := service.UserService.GetUser(ctx.Params("username"))
+func (service *workshopHandlers) UpdateAddress(ctx *fiber.Ctx) error {
+	rec, err := service.WorkshopService.GetWorkshop(ctx.Params("username"))
 	if err != nil {
 		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
 	}
 
-	ok := service.UserService.FindByID(fmt.Sprintf("%d", rec.ID))
+	ok := service.WorkshopService.FindByID(fmt.Sprintf("%d", rec.ID))
 	if ok != nil {
 		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
 	}
 
-	address := new(dto.UserAddressUpdateBody)
+	address := new(dto.WorkshopAddressUpdateBody)
 	e := ctx.BodyParser(address)
 	if e != nil {
 		return web.JsonResponse(ctx, http.StatusBadRequest, "something is not right with your request", nil)
@@ -147,7 +147,7 @@ func (service *userHandlers) UpdateAddress(ctx *fiber.Ctx) error {
 		return web.JsonResponse(ctx, http.StatusBadRequest, "field cannot be empty", nil)
 	}
 
-	res, err := service.UserService.UpdateAddress(address.ToDomain(), rec.ID)
+	res, err := service.WorkshopService.UpdateAddress(address.ToDomain(), rec.ID)
 	if err != nil {
 		return web.JsonResponse(ctx, http.StatusBadRequest, "problem with db", nil)
 	}
@@ -155,18 +155,18 @@ func (service *userHandlers) UpdateAddress(ctx *fiber.Ctx) error {
 	return web.JsonResponse(ctx, http.StatusOK, "successfully updated!", dto.FromDomainAddress(res)) //TODO
 }
 
-func (service *userHandlers) GetAddress(ctx *fiber.Ctx) error {
-	user, err := service.UserService.GetUser(ctx.Params("username"))
+func (service *workshopHandlers) GetAddress(ctx *fiber.Ctx) error {
+	workshop, err := service.WorkshopService.GetWorkshop(ctx.Params("username"))
 	if err != nil {
-		return web.JsonResponse(ctx, http.StatusOK, "user is not exist", nil)
+		return web.JsonResponse(ctx, http.StatusOK, "workshop is not exist", nil)
 	}
 
-	ok := service.UserService.FindByID(fmt.Sprintf("%d", user.ID))
+	ok := service.WorkshopService.FindByID(fmt.Sprintf("%d", workshop.ID))
 	if ok != nil {
 		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
 	}
 
-	address, _ := service.UserService.GetAddress(user.ID)
+	address, _ := service.WorkshopService.GetAddress(workshop.ID)
 
 	return web.JsonResponse(ctx, http.StatusOK, "success", dto.FromDomainAddress(address))
 }
