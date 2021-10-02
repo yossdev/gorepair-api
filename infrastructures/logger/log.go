@@ -4,20 +4,15 @@ import (
 	"gorepair-rest-api/config"
 	"log"
 	"os"
-	"sync"
 
 	"github.com/sirupsen/logrus"
 	"github.com/snowzach/rotatefilehook"
 )
 
-var once sync.Once
-
 var Log *logrus.Logger
 
-func init() {
-	once.Do(func() {
-		Log = newLogger()
-	})
+func InitLogger() {
+	Log = newLogger()
 }
 
 func newLogger() *logrus.Logger {
