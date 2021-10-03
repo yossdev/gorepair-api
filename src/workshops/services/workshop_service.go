@@ -41,9 +41,9 @@ func (c *workshopService) GetWorkshop(username string) (*entities.Workshops, err
 	return workshop, err
 }
 
-func (c *workshopService) Register(payload *entities.Workshops , street string) (*entities.Workshops, error) {
+func (c *workshopService) Register(payload *entities.Workshops , street, description string) (*entities.Workshops, error) {
 	payload.Password, _ = helper.Hash(payload.Password)
-	workshop, err := c.workshopMysqlRepository.Register(payload, street)
+	workshop, err := c.workshopMysqlRepository.Register(payload, street, description)
 	return workshop, err
 }
 

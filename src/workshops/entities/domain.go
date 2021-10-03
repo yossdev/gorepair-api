@@ -43,7 +43,7 @@ type Services struct {
 type WorkshopService interface {
 	FindByID(id string) error
 	GetWorkshop(username string) (*Workshops, error)
-	Register(payload *Workshops, street string) (*Workshops, error)
+	Register(payload *Workshops, street, description string) (*Workshops, error)
 	Login(payload *Workshops) (interface{}, error)
 	Logout(id string) error
 	UpdateAccount(payload *Workshops, id uint64) (*Workshops, error)
@@ -53,7 +53,7 @@ type WorkshopService interface {
 
 type WorkshopMysqlRepositoryInterface interface {
 	GetWorkshop(username string) (*Workshops, error)
-	Register(payload *Workshops, street string) (*Workshops, error)
+	Register(payload *Workshops, street, description string) (*Workshops, error)
 	FindByEmail(email string) *Workshops
 	UpdateAccount(payload *Workshops, id uint64) (*Workshops, error)
 	UpdateAddress(payload *WorkshopAddress, id uint64) (*WorkshopAddress, error)

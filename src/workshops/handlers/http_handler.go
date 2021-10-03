@@ -75,7 +75,7 @@ func (service *workshopHandlers) Register(ctx *fiber.Ctx) error {
 		return web.JsonResponse(ctx, http.StatusBadRequest, "field cannot be empty", nil)
 	}
 
-	workshop, err := service.WorkshopService.Register(payload.ToDomain(), payload.Street)
+	workshop, err := service.WorkshopService.Register(payload.ToDomain(), payload.Street, payload.Description)
 	if err != nil {
 		return web.JsonResponse(ctx, http.StatusInternalServerError, "workshop already exist", nil)
 	}

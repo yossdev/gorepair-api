@@ -1,22 +1,28 @@
 package dto
 
 import (
-	"fmt"
 	"gorepair-rest-api/src/workshops/entities"
 )
 
 type WorkshopResponseBody struct {
-	ID               string `json:"id"`
+	ID               uint64 `json:"id"`
 	Username         string `json:"username"`
 	Email            string `json:"email"`
 	Name             string `json:"name"`
 	Phone            string `json:"phone"`
 	OperationalStart string `json:"operational_start"`
 	OperationalEnd   string `json:"operational_end"`
+	Description 	 Description `json:"description"`
+}
+
+type Description struct {
+	ID			uint64	`json:"id"`
+	WorkshopID	uint64	`json:"workshop_id"`
+	Description	string	`json:"description"`
 }
 
 type WorkshopUpdateResponseBody struct {
-	ID               string `json:"id"`
+	ID               uint64 `json:"id"`
 	Username         string `json:"username"`
 	Email            string `json:"email"`
 	Name             string `json:"name"`
@@ -26,8 +32,8 @@ type WorkshopUpdateResponseBody struct {
 }
 
 type WorkshopResponseAddressBody struct {
-	ID             string `json:"id"`
-	WorkshopID     string `json:"workshop_id"`
+	ID             uint64 `json:"id"`
+	WorkshopID     uint64 `json:"workshop_id"`
 	BuildingNumber string `json:"building_number"`
 	Street         string `json:"street"`
 	City           string `json:"city"`
@@ -38,19 +44,24 @@ type WorkshopResponseAddressBody struct {
 
 func FromDomain(domain *entities.Workshops) WorkshopResponseBody {
 	return WorkshopResponseBody{
-		ID:       			fmt.Sprintf("%d", domain.ID),
+		ID:       			domain.ID,
 		Username: 			domain.Username,
 		Email:    			domain.Email,
 		Name:     			domain.Name,
 		Phone:    			domain.Phone,
 		OperationalStart: 	domain.OperationalStart,
 		OperationalEnd:   	domain.OperationalEnd,
+		Description: 		Description{
+			ID: 			domain.Description.ID,
+			WorkshopID: 	domain.Description.WorkshopID,
+			Description: 	domain.Description.Description,
+		},
 	}
 }
 
 func FromDomainUpdate(domain *entities.Workshops) WorkshopUpdateResponseBody {
 	return WorkshopUpdateResponseBody{
-		ID: 				fmt.Sprintf("%d", domain.ID),
+		ID: 				domain.ID,
 		Username: 			domain.Username,
 		Email: 				domain.Email,
 		Name: 				domain.Name,
@@ -62,8 +73,8 @@ func FromDomainUpdate(domain *entities.Workshops) WorkshopUpdateResponseBody {
 
 func FromDomainAddress(domain *entities.WorkshopAddress) WorkshopResponseAddressBody {
 	return WorkshopResponseAddressBody{
-		ID: 			fmt.Sprintf("%d", domain.ID),
-		WorkshopID: 	fmt.Sprintf("%d", domain.WorkshopID),
+		ID: 			domain.ID,
+		WorkshopID: 	domain.WorkshopID,
 		BuildingNumber: domain.BuildingNumber,
 		Street: 		domain.Street,
 		City: 			domain.City,
