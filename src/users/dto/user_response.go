@@ -1,13 +1,12 @@
 package dto
 
 import (
-	"fmt"
 	"gorepair-rest-api/src/users/entities"
 	"time"
 )
 
 type UserResponseBody struct {
-	ID       string 	`json:"id"`
+	ID       uint64 	`json:"id"`
 	Username string 	`json:"username"`
 	Email	 string 	`json:"email"`
 	Name     string 	`json:"name"`
@@ -17,7 +16,7 @@ type UserResponseBody struct {
 }
 
 type UserUpdateResponseBody struct {
-	ID       string 	`json:"id"`
+	ID       uint64 	`json:"id"`
 	Username string 	`json:"username"`
 	Email    string 	`json:"email"`
 	Name     string 	`json:"name"`
@@ -27,8 +26,8 @@ type UserUpdateResponseBody struct {
 }
 
 type UserResponseAddressBody struct {
-	ID             string `json:"id"`
-	UserID         string `json:"user_id"`
+	ID             uint64 `json:"id"`
+	UserID         uint64 `json:"user_id"`
 	BuildingNumber string `json:"building_number"`
 	Street         string `json:"street"`
 	City           string `json:"city"`
@@ -39,7 +38,7 @@ type UserResponseAddressBody struct {
 
 func FromDomain(domain *entities.Users) UserResponseBody {
 	return UserResponseBody{
-		ID: 		fmt.Sprintf("%d", domain.ID),
+		ID: 		domain.ID,
 		Username: 	domain.Username,
 		Email:		domain.Email,
 		Name: 		domain.Name,
@@ -51,7 +50,7 @@ func FromDomain(domain *entities.Users) UserResponseBody {
 
 func FromDomainUpdate(domain *entities.Users) UserUpdateResponseBody {
 	return UserUpdateResponseBody{
-		ID: 		fmt.Sprintf("%d", domain.ID),
+		ID: 		domain.ID,
 		Username: 	domain.Username,
 		Email: 		domain.Email,
 		Name: 		domain.Name,
@@ -63,8 +62,8 @@ func FromDomainUpdate(domain *entities.Users) UserUpdateResponseBody {
 
 func FromDomainAddress(domain *entities.UserAddress) UserResponseAddressBody {
 	return UserResponseAddressBody{
-		ID: 			fmt.Sprintf("%d", domain.ID),
-		UserID: 		fmt.Sprintf("%d", domain.UserID),
+		ID: 			domain.ID,
+		UserID: 		domain.UserID,
 		BuildingNumber: domain.BuildingNumber,
 		Street: 		domain.Street,
 		City: 			domain.City,
