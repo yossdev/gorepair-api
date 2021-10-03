@@ -66,6 +66,11 @@ func (rec *Workshop) toDomain() *entities.Workshops {
 		Phone: 				rec.Phone,
 		OperationalStart: 	rec.OperationalStart,
 		OperationalEnd: 	rec.OperationalEnd,
+		Description: 		entities.Descriptions{
+			ID: 			rec.Description.ID,
+			WorkshopID: 	rec.Description.WorkshopID,
+			Description: 	rec.Description.Description,
+		},
 	}
 }
 

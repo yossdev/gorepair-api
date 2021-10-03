@@ -17,16 +17,17 @@ func NewWorkshopMysqlRepository(DB db.MysqlDB) entities.WorkshopMysqlRepositoryI
 
 func (u *workshopMysqlRepository) GetWorkshop(param string) (*entities.Workshops, error) {
 	workshop := Workshop{}
-	if err := u.DB.DB().Preload("Address").First(&workshop, "username = ?", param).Error; err != nil {
+	if err := u.DB.DB().Preload("Description").First(&workshop, "username = ?", param).Error; err != nil {
 		return nil, err
 	}
 
 	return workshop.toDomain(), nil
 }
 
-func (u *workshopMysqlRepository) Register(payload *entities.Workshops, street string) (*entities.Workshops, error) {
+func (u *workshopMysqlRepository) Register(payload *entities.Workshops, street, description string) (*entities.Workshops, error) {
 	workshop := fromDomain(*payload)
 	workshop.Address = WorkshopAddress{Street: street}
+	workshop.Description = Description{Description: description}
 	e := u.DB.DB().Create(&workshop)
 	if e.Error != nil {
 		return nil, e.Error

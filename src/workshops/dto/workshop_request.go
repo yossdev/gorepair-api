@@ -16,6 +16,7 @@ type WorkshopRequestRegisterBody struct {
 	OperationalStart string `json:"operational_start" validate:"required"`
 	OperationalEnd   string `json:"operational_end" validate:"required"`
 	Street           string `json:"street" validate:"required"`
+	Description 	 string	`json:"description" validate:"required"`
 }
 
 type WorkshopAddressUpdateBody struct {
