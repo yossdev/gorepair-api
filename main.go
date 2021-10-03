@@ -23,7 +23,7 @@ func dbMigrate(db *gorm.DB) {
 		&_wr.Workshop{},
 		&_wr.WorkshopAddress{},
 		&_wr.Description{},
-		// &_wr.Service{},
+		&_wr.Service{},
 	)
 }
 

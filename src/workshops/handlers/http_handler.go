@@ -10,6 +10,7 @@ import (
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
 )
 
 type WorkshopHandlers interface {
@@ -20,6 +21,10 @@ type WorkshopHandlers interface {
 	UpdateAccount(ctx *fiber.Ctx) error
 	UpdateAddress(ctx *fiber.Ctx) error
 	GetAddress(ctx *fiber.Ctx) error
+	UpdateDescription(ctx *fiber.Ctx) error
+	ServicesNew(ctx *fiber.Ctx) error
+	UpdateServices(ctx *fiber.Ctx) error
+	DeleteServices(ctx *fiber.Ctx) error
 }
 
 type workshopHandlers struct {
@@ -169,4 +174,116 @@ func (service *workshopHandlers) GetAddress(ctx *fiber.Ctx) error {
 	address, _ := service.WorkshopService.GetAddress(workshop.ID)
 
 	return web.JsonResponse(ctx, http.StatusOK, "success", dto.FromDomainAddress(address))
+}
+
+func (service *workshopHandlers) UpdateDescription(ctx *fiber.Ctx) error {
+	rec, err := service.WorkshopService.GetWorkshop(ctx.Params("username"))
+	if err != nil {
+		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
+	}
+
+	ok := service.WorkshopService.FindByID(fmt.Sprintf("%d", rec.ID))
+	if ok != nil {
+		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
+	}
+
+	desc := new(dto.WorkshopDescriptionUpdateBody)
+	e := ctx.BodyParser(desc)
+	if e != nil {
+		return web.JsonResponse(ctx, http.StatusBadRequest, "something is not right with your request", nil)
+	}
+
+	if ok, _ := helper.ValidateInputs(*desc); !ok {
+		return web.JsonResponse(ctx, http.StatusBadRequest, "field cannot be empty", nil)
+	}
+
+	res, err := service.WorkshopService.UpdateDescription(desc.ToDomain(), rec.ID)
+	if err != nil {
+		return web.JsonResponse(ctx, http.StatusBadRequest, "problem with db", nil)
+	}
+
+	return web.JsonResponse(ctx, http.StatusOK, "description successfully updated!", dto.FromDomainDescription(res))
+}
+
+func (service *workshopHandlers) ServicesNew(ctx *fiber.Ctx) error {
+	rec, err := service.WorkshopService.GetWorkshop(ctx.Params("username"))
+	if err != nil {
+		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
+	}
+
+	ok := service.WorkshopService.FindByID(fmt.Sprintf("%d", rec.ID))
+	if ok != nil {
+		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
+	}
+
+	new := new(dto.ServicesNewReq)
+	e := ctx.BodyParser(new)
+	if e != nil {
+		return web.JsonResponse(ctx, http.StatusBadRequest, "something is not right with your request", nil)
+	}
+
+	if ok, _ := helper.ValidateInputs(*new); !ok {
+		return web.JsonResponse(ctx, http.StatusBadRequest, "field cannot be empty", nil)
+	}
+
+	res, err := service.WorkshopService.ServicesNew(new.ToDomain(), rec.ID)
+	if err != nil {
+		return web.JsonResponse(ctx, http.StatusBadRequest, "problem with db", nil)
+	}
+
+	return web.JsonResponse(ctx, http.StatusCreated, "successfully add new services!", dto.FromDomainServices(res))
+}
+
+func (service *workshopHandlers) UpdateServices(ctx *fiber.Ctx) error {
+	rec, err := service.WorkshopService.GetWorkshop(ctx.Params("username"))
+	if err != nil {
+		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
+	}
+
+	ok := service.WorkshopService.FindByID(fmt.Sprintf("%d", rec.ID))
+	if ok != nil {
+		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
+	}
+
+	s_update := new(dto.ServicesNewReq)
+	e := ctx.BodyParser(s_update)
+	if e != nil {
+		return web.JsonResponse(ctx, http.StatusBadRequest, "something is not right with your request", nil)
+	}
+
+	if ok, _ := helper.ValidateInputs(*s_update); !ok {
+		return web.JsonResponse(ctx, http.StatusBadRequest, "field cannot be empty", nil)
+	}
+
+	res, err := service.WorkshopService.UpdateServices(s_update.ToDomain(), rec.ID, ctx.Params("serviceId"))
+	if err == gorm.ErrRecordNotFound {
+		return web.JsonResponse(ctx, http.StatusOK, "no record found", nil)
+	}
+	if err != nil {
+		return web.JsonResponse(ctx, http.StatusBadRequest, "problem with db", nil)
+	}
+
+	return web.JsonResponse(ctx, http.StatusOK, "service successfully updated!", dto.FromDomainServices(res))
+}
+
+func (service *workshopHandlers) DeleteServices(ctx *fiber.Ctx) error {
+	rec, err := service.WorkshopService.GetWorkshop(ctx.Params("username"))
+	if err != nil {
+		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
+	}
+
+	ok := service.WorkshopService.FindByID(fmt.Sprintf("%d", rec.ID))
+	if ok != nil {
+		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
+	}
+
+	err = service.WorkshopService.DeleteServices(rec.ID, ctx.Params("serviceId"))
+	if err == gorm.ErrRecordNotFound {
+		return web.JsonResponse(ctx, http.StatusOK, "no record found", nil)
+	}
+	if err != nil {
+		return web.JsonResponse(ctx, http.StatusBadRequest, "problem with db", nil)
+	}
+
+	return web.JsonResponse(ctx, http.StatusOK, "service successfully deleted!", nil)
 }

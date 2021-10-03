@@ -1,6 +1,8 @@
 package dto
 
-import "gorepair-rest-api/src/workshops/entities"
+import (
+	"gorepair-rest-api/src/workshops/entities"
+)
 
 type WorkshopRequestLoginBody struct {
 	Email    string `json:"email"`
@@ -36,6 +38,17 @@ type WorkshopAccountUpdateBody struct {
 	Phone            string `json:"phone" validate:"required"`
 	OperationalStart string `json:"operational_start" validate:"required"`
 	OperationalEnd   string `json:"operational_end" validate:"required"`
+}
+
+type WorkshopDescriptionUpdateBody struct {
+	Description	string `json:"description" validate:"required"`
+}
+
+type ServicesNewReq struct {
+	Vehicle     string	`json:"vehicle" validate:"required"`
+	VehicleType string	`json:"vehicle_type" validate:"required"`
+	Services    string	`json:"services" validate:"required"`
+	Price       int	`json:"price" validate:"required"`
 }
 
 func (req *WorkshopRequestLoginBody) ToDomain() *entities.Workshops {
@@ -77,5 +90,20 @@ func (req *WorkshopAccountUpdateBody) ToDomain() *entities.Workshops {
 		Phone:            req.Phone,
 		OperationalStart: req.OperationalStart,
 		OperationalEnd:   req.OperationalEnd,
+	}
+}
+
+func (req *WorkshopDescriptionUpdateBody) ToDomain() *entities.Descriptions {
+	return &entities.Descriptions{
+		Description: req.Description,
+	}
+}
+
+func (req *ServicesNewReq) ToDomain() *entities.Services {
+	return &entities.Services{
+		Vehicle: 		req.Vehicle,
+		VehicleType: 	req.VehicleType,
+		Services: 		req.Services,
+		Price: 			req.Price,
 	}
 }

@@ -37,7 +37,7 @@ type Services struct {
 	Vehicle     string
 	VehicleType string
 	Services    string
-	Price       uint64
+	Price       int
 }
 
 type WorkshopService interface {
@@ -49,6 +49,10 @@ type WorkshopService interface {
 	UpdateAccount(payload *Workshops, id uint64) (*Workshops, error)
 	UpdateAddress(payload *WorkshopAddress, id uint64) (*WorkshopAddress, error)
 	GetAddress(id uint64) (*WorkshopAddress, error)
+	UpdateDescription(payload *Descriptions, id uint64) (*Descriptions, error)
+	ServicesNew(payload *Services, id uint64) (*Services, error)
+	UpdateServices(payload *Services, id uint64, servicesId string) (*Services, error)
+	DeleteServices(id uint64, servicesId string) error
 }
 
 type WorkshopMysqlRepositoryInterface interface {
@@ -58,6 +62,10 @@ type WorkshopMysqlRepositoryInterface interface {
 	UpdateAccount(payload *Workshops, id uint64) (*Workshops, error)
 	UpdateAddress(payload *WorkshopAddress, id uint64) (*WorkshopAddress, error)
 	GetAddress(id uint64) (*WorkshopAddress, error)
+	UpdateDescription(payload *Descriptions, id uint64) (*Descriptions, error)
+	ServicesNew(payload *Services, id uint64) (*Services, error)
+	UpdateServices(payload *Services, id uint64, servicesId uint64) (*Services, error)
+	DeleteServices(id, servicesId uint64) error
 }
 
 type WorkshopScribleRepositoryInterface interface {
