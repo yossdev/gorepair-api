@@ -16,21 +16,21 @@ type User struct {
 	Phone    string 		`gorm:"size:13; not null"`
 	Address  UserAddress   	`gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	// Orders    []Order        `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	CreatedAt time.Time		`gorm:"not null"`
-	UpdatedAt time.Time		`gorm:"not null"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 type UserAddress struct {
 	ID             uint64 		`gorm:"primaryKey; autoIncrement"`
 	UserID         uint64		`gorm:"unique"`
-	BuildingNumber string
+	BuildingNumber string		`gorm:"size:125"`
 	Street         string 		`gorm:"size:255"`
 	City           string 		`gorm:"size:50"`
 	Country	       string 		`gorm:"size:125"`
 	PostalCode     string 		`gorm:"size:10"`
 	Province       string 		`gorm:"size:50"`
-	CreatedAt      time.Time	`gorm:"not null"`
-	UpdatedAt      time.Time	`gorm:"not null"`
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
 }
 
 func (rec *User) toDomain() *entities.Users {
