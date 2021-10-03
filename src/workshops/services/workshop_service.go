@@ -5,6 +5,7 @@ import (
 	"gorepair-rest-api/internal/utils/auth"
 	"gorepair-rest-api/internal/utils/helper"
 	"gorepair-rest-api/src/workshops/entities"
+	"strconv"
 
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
@@ -94,4 +95,46 @@ func (c *workshopService) UpdateAddress(payload *entities.WorkshopAddress, id ui
 func (c *workshopService) GetAddress(id uint64) (*entities.WorkshopAddress, error)  {
 	address, err := c.workshopMysqlRepository.GetAddress(id)
 	return address, err
+}
+
+func (c *workshopService) UpdateDescription(payload *entities.Descriptions, id uint64) (*entities.Descriptions, error) {
+	res, err := c.workshopMysqlRepository.UpdateDescription(payload, id)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func (c *workshopService) ServicesNew(payload *entities.Services, id uint64) (*entities.Services, error) {
+	res, err := c.workshopMysqlRepository.ServicesNew(payload, id)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func (c *workshopService) UpdateServices(payload *entities.Services, id uint64, servicesId string) (*entities.Services, error) {
+	servID, e := strconv.ParseUint(servicesId, 10, 64)
+	if e != nil {
+		return nil, e
+	}
+
+	res, err := c.workshopMysqlRepository.UpdateServices(payload, id, servID)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func (c *workshopService) DeleteServices(id uint64, servicesId string) error {
+	servID, e := strconv.ParseUint(servicesId, 10, 64)
+	if e != nil {
+		return e
+	}
+
+	err := c.workshopMysqlRepository.DeleteServices(id, servID)
+	if err != nil {
+		return err
+	}
+	return nil
 }

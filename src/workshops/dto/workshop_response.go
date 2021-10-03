@@ -12,13 +12,22 @@ type WorkshopResponseBody struct {
 	Phone            string `json:"phone"`
 	OperationalStart string `json:"operational_start"`
 	OperationalEnd   string `json:"operational_end"`
-	Description 	 Description `json:"description"`
+	Description 	 DescriptionUpdateRes `json:"description"`
 }
 
-type Description struct {
+type DescriptionUpdateRes struct {
 	ID			uint64	`json:"id"`
 	WorkshopID	uint64	`json:"workshop_id"`
 	Description	string	`json:"description"`
+}
+
+type ServicesNewRes struct {
+	ID          uint64	`json:"id"`
+	WorkshopID  uint64	`json:"workshop_id"`
+	Vehicle     string	`json:"vehicle"`
+	VehicleType string	`json:"vehicle_type"`
+	Services    string	`json:"services"`
+	Price       int		`json:"price"`
 }
 
 type WorkshopUpdateResponseBody struct {
@@ -51,7 +60,7 @@ func FromDomain(domain *entities.Workshops) WorkshopResponseBody {
 		Phone:    			domain.Phone,
 		OperationalStart: 	domain.OperationalStart,
 		OperationalEnd:   	domain.OperationalEnd,
-		Description: 		Description{
+		Description: 		DescriptionUpdateRes{
 			ID: 			domain.Description.ID,
 			WorkshopID: 	domain.Description.WorkshopID,
 			Description: 	domain.Description.Description,
@@ -81,5 +90,24 @@ func FromDomainAddress(domain *entities.WorkshopAddress) WorkshopResponseAddress
 		Country: 		domain.Country,
 		PostalCode: 	domain.PostalCode,
 		Province: 		domain.Province,
+	}
+}
+
+func FromDomainDescription(domain *entities.Descriptions) DescriptionUpdateRes {
+	return DescriptionUpdateRes{
+		ID: 			domain.ID,
+		WorkshopID: 	domain.WorkshopID,
+		Description: 	domain.Description,
+	}
+}
+
+func FromDomainServices(domain *entities.Services) ServicesNewRes {
+	return ServicesNewRes{
+		ID: 			domain.ID,
+		WorkshopID: 	domain.WorkshopID,
+		Vehicle: 		domain.Vehicle,
+		VehicleType: 	domain.VehicleType,
+		Services: 		domain.Services,
+		Price: 			domain.Price,
 	}
 }

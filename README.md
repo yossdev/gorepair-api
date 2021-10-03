@@ -10,7 +10,7 @@ Final backend project alterra academy kampus merdeka using clean architecture.
 
 - [x] Membuat akun pengusaha bengkel
 
-- [ ] Menambah atau mengubah informasi bengkel (lokasi bengkel, jenis layanan, biaya layanan, jam operasional)
+- [x] Menambah atau mengubah informasi bengkel (lokasi bengkel, jenis layanan, biaya layanan, jadwal operasional)
 
 - [ ] Mendapatkan list bengkel (berdasarkan IP geolocation) dan informasi bengkel yang dipilih pengguna
 

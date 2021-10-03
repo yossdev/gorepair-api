@@ -81,3 +81,66 @@ func (u *workshopMysqlRepository) GetAddress(id uint64) (*entities.WorkshopAddre
 
 	return address.toDomain(), nil
 }
+
+func (u *workshopMysqlRepository) UpdateDescription(payload *entities.Descriptions, id uint64) (*entities.Descriptions, error) {
+	desc := Description{}
+
+	u.DB.DB().First(&desc, "workshop_id = ?", id)
+
+	fromDomainDescription(payload, &desc)
+
+	res := u.DB.DB().Save(&desc)
+	if res.Error != nil {
+		return nil, res.Error
+	}
+
+	return desc.toDomain(), nil
+}
+
+func (u *workshopMysqlRepository) ServicesNew(payload *entities.Services, id uint64) (*entities.Services, error) {
+	service := Service{}
+
+	fromDomainServices(payload, &service)
+	service.WorkshopID = id
+
+	res := u.DB.DB().Save(&service)
+	if res.Error != nil {
+		return nil, res.Error
+	}
+
+	return service.toDomain(), nil
+}
+
+func (u *workshopMysqlRepository) UpdateServices(payload *entities.Services, id, servicesId uint64) (*entities.Services, error) {
+	service := Service{}
+
+	find := u.DB.DB().First(&service, "workshop_id = ? AND id = ?", id, servicesId)
+	if find.Error != nil {
+		return nil, find.Error
+	}
+
+	fromDomainServices(payload, &service)
+	
+	res := u.DB.DB().Save(&service)
+	if res.Error != nil {
+		return nil, res.Error
+	}
+
+	return service.toDomain(), nil
+}
+
+func (u *workshopMysqlRepository) DeleteServices(id, servicesId uint64) error {
+	service := Service{}
+
+	find := u.DB.DB().First(&service, "workshop_id = ? AND id = ?", id, servicesId)
+	if find.Error != nil {
+		return find.Error
+	}
+
+	del := u.DB.DB().Delete(&service)
+	if del.Error != nil {
+		return del.Error
+	}
+	
+	return nil
+}

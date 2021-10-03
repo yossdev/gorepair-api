@@ -3,6 +3,8 @@ package repositories
 import (
 	"gorepair-rest-api/src/workshops/entities"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type Workshop struct {
@@ -45,15 +47,15 @@ type Description struct {
 
 type Service struct {
 	ID          uint64	`gorm:"primaryKey; autoIncrement" json:"id"`
-	WorkshopID  uint64	`gorm:"unique"`
+	WorkshopID  uint64
 	Vehicle     string 	`gorm:"size:125"`
 	VehicleType string 	`gorm:"size:45"`
 	Services    string 	`gorm:"size:255" json:"type" form:"type"`
-	Price       uint64
+	Price       int
 	// Orders      []Order	`gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"orders"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
-	// DeletedAt   gorm.DeletedAt `gorm:"index"`
+	DeletedAt   gorm.DeletedAt `gorm:"index"`
 }
 
 func (rec *Workshop) toDomain() *entities.Workshops {
@@ -116,4 +118,34 @@ func fromDomainAccount(payload *entities.Workshops, account *Workshop) {
 	account.Phone = payload.Phone
 	account.OperationalStart = payload.OperationalStart
 	account.OperationalEnd = payload.OperationalEnd
+}
+
+func fromDomainDescription(payload *entities.Descriptions, desc *Description) {
+	desc.Description = payload.Description
+}
+
+func (rec *Description) toDomain() *entities.Descriptions {
+	return &entities.Descriptions{
+		ID: 			rec.ID,
+		WorkshopID: 	rec.WorkshopID,
+		Description: 	rec.Description,
+	}
+}
+
+func fromDomainServices(payload *entities.Services, service *Service) {
+	service.Vehicle = payload.Vehicle
+	service.VehicleType = payload.VehicleType
+	service.Services = payload.Services
+	service.Price = payload.Price
+}
+
+func (rec *Service) toDomain() *entities.Services {
+	return &entities.Services{
+		ID: 			rec.ID,
+		WorkshopID: 	rec.WorkshopID,
+		Vehicle: 		rec.Vehicle,
+		VehicleType: 	rec.VehicleType,
+		Services: 		rec.Services,
+		Price: 			rec.Price,
+	}
 }
