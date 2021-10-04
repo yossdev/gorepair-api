@@ -62,7 +62,7 @@ func (service *workshopHandlers) Logout(ctx *fiber.Ctx) error {
 		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
 	}
 
-	e := service.WorkshopService.Logout(fmt.Sprintf("%d", workshop.ID))
+	e := service.WorkshopService.Logout(fmt.Sprintf("%d", workshop.ID), ctx.Get("id"))
 	if e != nil {
 		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
 	}
@@ -89,14 +89,14 @@ func (service *workshopHandlers) Register(ctx *fiber.Ctx) error {
 }
 
 func (service *workshopHandlers) GetWorkshop(ctx *fiber.Ctx) error {
-	// err := service.WorkshopService.FindByID(ctx.Get("id"))
-	// if err != nil {
-	// 	return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
-	// }
-
 	workshop, err := service.WorkshopService.GetWorkshop(ctx.Params("username"))
 	if err != nil {
 		return web.JsonResponse(ctx, http.StatusOK, "workshop is not exist", nil)
+	}
+
+	ok := service.WorkshopService.FindByID(fmt.Sprintf("%d", workshop.ID))
+	if ok != nil {
+		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
 	}
 
 	return web.JsonResponse(ctx, http.StatusOK, "success", dto.FromDomain(workshop))

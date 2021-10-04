@@ -2,6 +2,7 @@ package services
 
 import (
 	"database/sql"
+	"errors"
 	"gorepair-rest-api/internal/utils/auth"
 	"gorepair-rest-api/internal/utils/helper"
 	"gorepair-rest-api/src/users/entities"
@@ -67,7 +68,11 @@ func (c *userService) Login(payload *entities.Users) (interface{}, error) {
 	return token, nil
 }
 
-func (c *userService) Logout(id string) error {
+func (c *userService) Logout(id, ctxId string) error {
+	if id != ctxId {
+		return errors.New("")
+	}
+
 	err := c.userScribleRepository.DeleteUserRefreshToken(id)
 	if err != nil {
 		return err
