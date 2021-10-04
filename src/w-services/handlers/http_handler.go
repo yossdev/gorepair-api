@@ -26,14 +26,14 @@ func NewHttpHandler(wservicesService entities.WServicesService) WServicesHandler
 
 func (s *wservicesHandlers) GetAll(ctx *fiber.Ctx) error {
 	res, _ := s.WServicesService.GetAll()
-	return web.JsonResponse(ctx, http.StatusOK, "success", dto.FromDomainGetServicesSlice(res))
+	return web.JsonResponse(ctx, http.StatusOK, web.Success, dto.FromDomainGetServicesSlice(res))
 }
 
 func (s *wservicesHandlers) GetDetails(ctx *fiber.Ctx) error {
 	res, err := s.WServicesService.GetDetails(ctx.Params("serviceId"))
 	if err != nil {
-		return web.JsonResponse(ctx, http.StatusOK, "services not exit", dto.FromDomainGetServices(res))
+		return web.JsonResponse(ctx, http.StatusOK, web.ServicesNotExist, dto.FromDomainGetServices(res))
 	}
 
-	return web.JsonResponse(ctx, http.StatusOK, "success", dto.FromDomainGetServices(res))
+	return web.JsonResponse(ctx, http.StatusOK, web.Success, dto.FromDomainGetServices(res))
 }
