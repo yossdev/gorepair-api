@@ -19,7 +19,6 @@ type Workshop struct {
 	Description      Description      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	Address          WorkshopAddress  `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	Services         []Service        `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	// Orders           []Order          `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
 }
@@ -52,7 +51,6 @@ type Service struct {
 	VehicleType string 	`gorm:"size:45"`
 	Services    string 	`gorm:"size:255" json:"type" form:"type"`
 	Price       int
-	// Orders      []Order	`gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"orders"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	DeletedAt   gorm.DeletedAt `gorm:"index"`

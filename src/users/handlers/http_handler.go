@@ -57,7 +57,7 @@ func (service *userHandlers) Logout(ctx *fiber.Ctx) error {
 		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
 	}
 
-	e := service.UserService.Logout(fmt.Sprintf("%d", user.ID))
+	e := service.UserService.Logout(fmt.Sprintf("%d", user.ID), ctx.Get("id"))
 	if e != nil {
 		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
 	}
@@ -84,14 +84,14 @@ func (service *userHandlers) Register(ctx *fiber.Ctx) error {
 }
 
 func (service *userHandlers) GetUser(ctx *fiber.Ctx) error {
-	// err := service.UserService.FindByID(ctx.Get("id"))
-	// if err != nil {
-	// 	return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
-	// }
-
 	user, err := service.UserService.GetUser(ctx.Params("username"))
 	if err != nil {
 		return web.JsonResponse(ctx, http.StatusOK, "user is not exist", nil)
+	}
+
+	ok := service.UserService.FindByID(fmt.Sprintf("%d", user.ID))
+	if ok != nil {
+		return web.JsonResponse(ctx, http.StatusForbidden, "forbidden", nil)
 	}
 
 	return web.JsonResponse(ctx, http.StatusOK, "success", dto.FromDomain(user))

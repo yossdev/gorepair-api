@@ -8,6 +8,7 @@ import (
 	"gorepair-rest-api/internal/routes"
 	_s "gorepair-rest-api/internal/utils/start-server"
 	"gorepair-rest-api/internal/web"
+	_or "gorepair-rest-api/src/orders/repositories"
 	_ur "gorepair-rest-api/src/users/repositories"
 	_wr "gorepair-rest-api/src/workshops/repositories"
 	"log"
@@ -24,6 +25,7 @@ func dbMigrate(db *gorm.DB) {
 		&_wr.WorkshopAddress{},
 		&_wr.Description{},
 		&_wr.Service{},
+		&_or.Order{},
 	)
 }
 
