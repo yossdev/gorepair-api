@@ -2,6 +2,7 @@ package services
 
 import (
 	"database/sql"
+	"errors"
 	"gorepair-rest-api/internal/utils/auth"
 	"gorepair-rest-api/internal/utils/helper"
 	"gorepair-rest-api/src/workshops/entities"
@@ -67,7 +68,11 @@ func (c *workshopService) Login(payload *entities.Workshops) (interface{}, error
 	return token, nil
 }
 
-func (c *workshopService) Logout(id string) error {
+func (c *workshopService) Logout(id, ctxId string) error {
+	if id != ctxId {
+		return errors.New("")
+	}
+
 	err := c.workshopScribleRepository.DeleteWorkshopRefreshToken(id)
 	if err != nil {
 		return err

@@ -3,7 +3,9 @@ package routes
 import (
 	"gorepair-rest-api/internal/middleware"
 	"gorepair-rest-api/internal/web"
+	_orderRoute "gorepair-rest-api/src/orders/router"
 	_userRoute "gorepair-rest-api/src/users/router"
+	_servicesRoute "gorepair-rest-api/src/w-services/router"
 	_workshopRoute "gorepair-rest-api/src/workshops/router"
 	"log"
 	"net/http"
@@ -53,6 +55,20 @@ func (c *RouterStruct) GetRoutes() {
 	}
 	workshopRouter := _workshopRoute.NewHttpRoute(workshopRouterStruct)
 	workshopRouter.GetRoute()
+
+	// Order Route
+	orderRouterStruct := _orderRoute.RouterStruct {
+		RouterStruct: webRouterConfig,
+	}
+	orderRouter := _orderRoute.NewHttpRoute(orderRouterStruct)
+	orderRouter.GetRoute()
+
+	// Services Route
+	servicesRouterStruct := _servicesRoute.RouterStruct {
+		RouterStruct: webRouterConfig,
+	}
+	servicesRouter := _servicesRoute.NewHttpRoute(servicesRouterStruct)
+	servicesRouter.GetRoute()
 
 	// handling 404 error
 	c.Web.Use(func(c *fiber.Ctx) error {

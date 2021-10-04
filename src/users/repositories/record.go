@@ -15,7 +15,6 @@ type User struct {
 	DOB		 time.Time
 	Phone    string 		`gorm:"size:13; not null"`
 	Address  UserAddress   	`gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	// Orders    []Order        `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

@@ -32,7 +32,7 @@ type UserService interface {
 	GetUser(username string) (*Users, error)
 	Register(payload *Users, street string) (*Users, error)
 	Login(payload *Users) (interface{}, error)
-	Logout(id string) error
+	Logout(id, ctxId string) error
 	UpdateAccount(payload *Users, id uint64) (*Users, error)
 	UpdateAddress(payload *UserAddress, id uint64) (*UserAddress, error)
 	GetAddress(id uint64) (*UserAddress, error)

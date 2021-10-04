@@ -48,7 +48,7 @@ type ServicesNewReq struct {
 	Vehicle     string	`json:"vehicle" validate:"required"`
 	VehicleType string	`json:"vehicle_type" validate:"required"`
 	Services    string	`json:"services" validate:"required"`
-	Price       int	`json:"price" validate:"required"`
+	Price       int		`json:"price" validate:"required"`
 }
 
 func (req *WorkshopRequestLoginBody) ToDomain() *entities.Workshops {

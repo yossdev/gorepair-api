@@ -142,7 +142,7 @@ func TestLogOut(t *testing.T) {
 	jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(userJwt).Once()
 
 	t.Run("Test LogOut", func(t *testing.T) {
-		err := userUsecase.Logout("1")
+		err := userUsecase.Logout("1", "1")
 
 		assert.Nil(t, err)
 	})

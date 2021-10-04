@@ -12,15 +12,13 @@ Final backend project alterra academy kampus merdeka using clean architecture.
 
 - [x] Menambah atau mengubah informasi bengkel (lokasi bengkel, jenis layanan, biaya layanan, jadwal operasional)
 
-- [ ] Mendapatkan list bengkel (berdasarkan IP geolocation) dan informasi bengkel yang dipilih pengguna
+- [x] Mendapatkan list bengkel (berdasarkan IP geolocation) dan informasi bengkel yang dipilih pengguna
 
-- [ ] Membuat transaksi order service on-site atau penjemputan kendaraan
+- [x] Membuat transaksi order service on-site atau penjemputan kendaraan
 
-- [ ] Melihat status order (placed, on process, ready to take)
+- [x] Melihat order dari user dan workshop
 
-- [ ] Membatalkan atau menghapus transaksi
-
-- [ ] Rating ke pengguna atau ke bengkel
+- [x] User membatalkan transaksi
 
 ## API Server technology stack is
 

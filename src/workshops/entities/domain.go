@@ -45,7 +45,7 @@ type WorkshopService interface {
 	GetWorkshop(username string) (*Workshops, error)
 	Register(payload *Workshops, street, description string) (*Workshops, error)
 	Login(payload *Workshops) (interface{}, error)
-	Logout(id string) error
+	Logout(id, ctxId string) error
 	UpdateAccount(payload *Workshops, id uint64) (*Workshops, error)
 	UpdateAddress(payload *WorkshopAddress, id uint64) (*WorkshopAddress, error)
 	GetAddress(id uint64) (*WorkshopAddress, error)
