@@ -12,6 +12,7 @@ import (
 type WServicesHandlers interface {
 	GetAll(ctx *fiber.Ctx) error
 	GetDetails(ctx *fiber.Ctx) error
+	GetAllWorkshop(ctx *fiber.Ctx) error
 }
 
 type wservicesHandlers struct {
@@ -25,7 +26,11 @@ func NewHttpHandler(wservicesService entities.WServicesService) WServicesHandler
 }
 
 func (s *wservicesHandlers) GetAll(ctx *fiber.Ctx) error {
-	res, _ := s.WServicesService.GetAll()
+	res, err := s.WServicesService.GetAll()
+	if err != nil {
+		return web.JsonResponse(ctx, http.StatusOK, web.ServicesNotExist, nil)
+	}
+
 	return web.JsonResponse(ctx, http.StatusOK, web.Success, dto.FromDomainGetServicesSlice(res))
 }
 
@@ -36,4 +41,13 @@ func (s *wservicesHandlers) GetDetails(ctx *fiber.Ctx) error {
 	}
 
 	return web.JsonResponse(ctx, http.StatusOK, web.Success, dto.FromDomainGetServices(res))
+}
+
+func (s *wservicesHandlers) GetAllWorkshop(ctx *fiber.Ctx) error {
+	res, err := s.WServicesService.GetAllWorkshop()
+	if err != nil {
+		return web.JsonResponse(ctx, http.StatusOK, web.DataNotFound, nil)
+	}
+
+	return web.JsonResponse(ctx, http.StatusOK, web.Success, dto.FromDomainWS(res))
 }

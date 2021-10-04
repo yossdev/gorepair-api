@@ -1,6 +1,9 @@
 package dto
 
-import "gorepair-rest-api/src/w-services/entities"
+import (
+	"gorepair-rest-api/src/w-services/entities"
+	_ws "gorepair-rest-api/src/workshops/entities"
+)
 
 type ServiceDetailsResp struct {
 	ID          uint64 `json:"id"`
@@ -9,6 +12,10 @@ type ServiceDetailsResp struct {
 	VehicleType string `json:"vehicle_type"`
 	Services    string `json:"services"`
 	Price       int    `json:"price"`
+}
+
+type WorkshopServicesByIP struct {
+	WorkshopID  uint64 `json:"workshop_id"`
 }
 
 func FromDomainGetServices(domain entities.WServices) ServiceDetailsResp {
@@ -27,6 +34,21 @@ func FromDomainGetServicesSlice(domain []entities.WServices) []ServiceDetailsRes
 
 	for _, val := range domain {
 		res = append(res, FromDomainGetServices(val))
+	}
+	return res
+}
+
+func FromDomain(rec _ws.WorkshopAddress) WorkshopServicesByIP {
+	return WorkshopServicesByIP{
+		WorkshopID: rec.WorkshopID,
+	}
+}
+
+func FromDomainWS(rec []_ws.WorkshopAddress) []WorkshopServicesByIP {
+	res := []WorkshopServicesByIP{}
+
+	for _, val := range rec {
+		res = append(res, FromDomain(val))
 	}
 	return res
 }

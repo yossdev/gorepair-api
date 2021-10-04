@@ -29,7 +29,7 @@ type WorkshopAddress struct {
 	BuildingNumber string 	`gorm:"size:125"`
 	Street         string 	`gorm:"size:255"`
 	City           string 	`gorm:"size:50"`
-	Country 	   string 	`gorm:"size:5"`
+	Country 	   string 	`gorm:"size:125"`
 	PostalCode     string 	`gorm:"size:10"`
 	Province       string	`gorm:"size:50"`
 	CreatedAt      time.Time
