@@ -2,6 +2,10 @@
 
 Final backend project alterra academy kampus merdeka using clean architecture.
 
+## PTT Project
+
+[GoRepair Rest API](https://docs.google.com/presentation/d/1-uC8uCqV3RVZLgBC5wcxVw5ane95b4jvYOxG6fqoTBA/edit?usp=sharing)
+
 ## MVP
 
 - [x] Membuat akun pengguna

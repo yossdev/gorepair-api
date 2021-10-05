@@ -31,14 +31,6 @@ func NewUserService(
 	}
 }
 
-// func (c *userService) FindByID(id string) error {
-// 	err := c.userScribleRepository.FindUserRefreshToken(id)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }
-
 func (c *userService) GetUser(username string) (*entities.Users, error) {
 	user, err := c.userMysqlRepository.GetUser(username)
 	if err := c.userScribleRepository.FindUserRefreshToken(fmt.Sprintf("%d", user.ID)); err != nil {

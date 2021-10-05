@@ -45,16 +45,6 @@ func (service *userHandlers) Login(ctx *fiber.Ctx) error {
 }
 
 func (service *userHandlers) Logout(ctx *fiber.Ctx) error {
-	// err := service.UserService.FindByID(ctx.Get("id"))
-	// if err != nil {
-	// 	return web.JsonResponse(ctx, http.StatusForbidden, web.Forbidden, nil)
-	// }
-
-	// user, err := service.UserService.GetUser(ctx.Params("username"))
-	// if err != nil {
-	// 	return web.JsonResponse(ctx, http.StatusForbidden, web.Forbidden, nil)
-	// }
-
 	e := service.UserService.Logout(ctx.Get("id"), ctx.Params("username"))
 	if e != nil {
 		return web.JsonResponse(ctx, http.StatusForbidden, web.Forbidden, nil)
@@ -87,25 +77,10 @@ func (service *userHandlers) GetUser(ctx *fiber.Ctx) error {
 		return web.JsonResponse(ctx, http.StatusForbidden, web.Forbidden, nil)
 	}
 
-	// ok := service.UserService.FindByID(fmt.Sprintf("%d", user.ID))
-	// if ok != nil {
-	// 	return web.JsonResponse(ctx, http.StatusForbidden, web.Forbidden, nil)
-	// }
-
 	return web.JsonResponse(ctx, http.StatusOK, web.Success, dto.FromDomain(user))
 }
 
 func (service *userHandlers) UpdateAccount(ctx *fiber.Ctx) error {
-	// rec, err := service.UserService.GetUser(ctx.Params("username"))
-	// if err != nil {
-	// 	return web.JsonResponse(ctx, http.StatusForbidden, web.Forbidden, nil)
-	// }
-
-	// ok := service.UserService.FindByID(fmt.Sprintf("%d", rec.ID))
-	// if ok != nil {
-	// 	return web.JsonResponse(ctx, http.StatusForbidden, web.Forbidden, nil)
-	// }
-
 	account := new(dto.UserAccountUpdateBody)
 	e := ctx.BodyParser(account)
 	if e != nil {
@@ -125,16 +100,6 @@ func (service *userHandlers) UpdateAccount(ctx *fiber.Ctx) error {
 }
 
 func (service *userHandlers) UpdateAddress(ctx *fiber.Ctx) error {
-	// rec, err := service.UserService.GetUser(ctx.Params("username"))
-	// if err != nil {
-	// 	return web.JsonResponse(ctx, http.StatusForbidden, web.Forbidden, nil)
-	// }
-
-	// ok := service.UserService.FindByID(fmt.Sprintf("%d", rec.ID))
-	// if ok != nil {
-	// 	return web.JsonResponse(ctx, http.StatusForbidden, web.Forbidden, nil)
-	// }
-
 	address := new(dto.UserAddressUpdateBody)
 	e := ctx.BodyParser(address)
 	if e != nil {
@@ -154,16 +119,6 @@ func (service *userHandlers) UpdateAddress(ctx *fiber.Ctx) error {
 }
 
 func (service *userHandlers) GetAddress(ctx *fiber.Ctx) error {
-	// user, err := service.UserService.GetUser(ctx.Params("username"))
-	// if err != nil {
-	// 	return web.JsonResponse(ctx, http.StatusOK, web.UserNotExist, nil)
-	// }
-
-	// ok := service.UserService.FindByID(fmt.Sprintf("%d", user.ID))
-	// if ok != nil {
-	// 	return web.JsonResponse(ctx, http.StatusForbidden, web.Forbidden, nil)
-	// }
-
 	address, err := service.UserService.GetAddress(ctx.Params("username"))
 	if err != nil {
 		return web.JsonResponse(ctx, http.StatusForbidden, web.Forbidden, nil)
