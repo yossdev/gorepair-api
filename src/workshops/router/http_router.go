@@ -32,7 +32,7 @@ func (r *RouterStruct) GetRoute() {
 	v1.Put("/:username/address/update", middleware.JwtVerifyRefresh, middleware.WorkshopRestricted, workshopHandlers.UpdateAddress)
 	v1.Get("/:username/address", middleware.JwtVerifyRefresh, workshopHandlers.GetAddress)
 	v1.Put("/:username/description", middleware.JwtVerifyRefresh, middleware.WorkshopRestricted, workshopHandlers.UpdateDescription)
-	
+
 	v1.Post("/:username/services", middleware.JwtVerifyRefresh, middleware.WorkshopRestricted, workshopHandlers.ServicesNew)
 	v1.Put("/:username/services/:serviceId", middleware.JwtVerifyRefresh, middleware.WorkshopRestricted, workshopHandlers.UpdateServices)
 	v1.Delete("/:username/services/:serviceId", middleware.JwtVerifyRefresh, middleware.WorkshopRestricted, workshopHandlers.DeleteServices)

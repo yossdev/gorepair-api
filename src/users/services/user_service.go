@@ -3,6 +3,7 @@ package services
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"gorepair-rest-api/internal/utils/auth"
 	"gorepair-rest-api/internal/utils/helper"
 	"gorepair-rest-api/src/users/entities"
@@ -30,16 +31,11 @@ func NewUserService(
 	}
 }
 
-func (c *userService) FindByID(id string) error {
-	err := c.userScribleRepository.FindUserRefreshToken(id)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func (c *userService) GetUser(username string) (*entities.Users, error) {
 	user, err := c.userMysqlRepository.GetUser(username)
+	if err := c.userScribleRepository.FindUserRefreshToken(fmt.Sprintf("%d", user.ID)); err != nil {
+		return nil, err
+	}
 	return user, err
 }
 
@@ -68,36 +64,78 @@ func (c *userService) Login(payload *entities.Users) (interface{}, error) {
 	return token, nil
 }
 
-func (c *userService) Logout(id, ctxId string) error {
+func (c *userService) Logout(ctxId, username string) error {
+	if err := c.userScribleRepository.FindUserRefreshToken(ctxId); err != nil {
+		return err
+	}
+
+	user, err := c.userMysqlRepository.GetUser(username)
+	if err != nil {
+		return err
+	}
+
+	id := fmt.Sprintf("%d", user.ID)
+
 	if id != ctxId {
 		return errors.New("")
 	}
 
-	err := c.userScribleRepository.DeleteUserRefreshToken(id)
-	if err != nil {
+	if err := c.userScribleRepository.DeleteUserRefreshToken(id); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (c *userService) UpdateAccount(payload *entities.Users, id uint64) (*entities.Users, error) {
+func (c *userService) UpdateAccount(payload *entities.Users, username string) (*entities.Users, error) {
+	u, e := c.userMysqlRepository.GetUser(username)
+	if e != nil {
+		return nil, e
+	}
+
+	id := fmt.Sprintf("%d", u.ID)
+
+	if err := c.userScribleRepository.FindUserRefreshToken(id); err != nil {
+		return nil, err
+	}
+
 	payload.Password, _ = helper.Hash(payload.Password)
-	user, err := c.userMysqlRepository.UpdateAccount(payload, id)
+	user, err := c.userMysqlRepository.UpdateAccount(payload, u.ID)
 	if err != nil {
 		return user, err
 	}
 	return user, nil
 }
 
-func (c *userService) UpdateAddress(payload *entities.UserAddress, id uint64) (*entities.UserAddress, error) {
-	res, err := c.userMysqlRepository.UpdateAddress(payload, id)
+func (c *userService) UpdateAddress(payload *entities.UserAddress, username string) (*entities.UserAddress, error) {
+	u, e := c.userMysqlRepository.GetUser(username)
+	if e != nil {
+		return nil, e
+	}
+
+	id := fmt.Sprintf("%d", u.ID)
+
+	if err := c.userScribleRepository.FindUserRefreshToken(id); err != nil {
+		return nil, err
+	}
+	
+	res, err := c.userMysqlRepository.UpdateAddress(payload, u.ID)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-func (c *userService) GetAddress(id uint64) (*entities.UserAddress, error)  {
-	address, err := c.userMysqlRepository.GetAddress(id)
+func (c *userService) GetAddress(username string) (*entities.UserAddress, error)  {
+	u, e := c.userMysqlRepository.GetUser(username)
+	if e != nil {
+		return nil, e
+	}
+
+	id := fmt.Sprintf("%d", u.ID)
+
+	if err := c.userScribleRepository.FindUserRefreshToken(id); err != nil {
+		return nil, err
+	}
+	address, err := c.userMysqlRepository.GetAddress(u.ID)
 	return address, err
 }

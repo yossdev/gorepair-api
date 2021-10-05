@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"gorepair-rest-api/internal/utils/auth"
 	"gorepair-rest-api/src/workshops/entities"
 	"gorepair-rest-api/src/workshops/entities/mocks"
@@ -10,13 +11,15 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-var workshopMysqlRepository mocks.WorkshopMysqlRepositoryInterface
-var workshopScribleRepository mocks.WorkshopScribleRepositoryInterface
-var jwtAuth mocks.JwtTokenInterface
+var (
+	workshopMysqlRepository mocks.WorkshopMysqlRepositoryInterface
+	workshopScribleRepository mocks.WorkshopScribleRepositoryInterface
+	jwtAuth mocks.JwtTokenInterface
 
-var workshopUsecase entities.WorkshopService
-var workshopDomain *entities.Workshops
-var workshopJwt auth.TokenStruct
+	workshopUsecase entities.WorkshopService
+	workshopDomain *entities.Workshops
+	workshopJwt auth.TokenStruct
+)
 
 func setup() {
 	workshopUsecase = NewWorkshopService(&workshopMysqlRepository, &workshopScribleRepository, &jwtAuth)
@@ -64,12 +67,12 @@ func setup() {
 func TestLogin(t *testing.T) {
 	setup()
 
-	workshopMysqlRepository.On("FindByEmail",
-		mock.AnythingOfType("string")).Return(workshopDomain).Twice()
-
-	jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(workshopJwt).Twice()
-
 	t.Run("Test Case 1 | Valid Login", func(t *testing.T) {
+		workshopMysqlRepository.On("FindByEmail",
+			mock.AnythingOfType("string")).Return(workshopDomain).Once()
+
+		jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(workshopJwt).Once()
+
 		token, err := workshopUsecase.Login(&entities.Workshops{
 			Email:    "zc@gmail.com",
 			Password: "asdf123",
@@ -80,6 +83,11 @@ func TestLogin(t *testing.T) {
 	})
 
 	t.Run("Test Case 2 | Invalid Password", func(t *testing.T) {
+		workshopMysqlRepository.On("FindByEmail",
+			mock.AnythingOfType("string")).Return(workshopDomain).Once()
+
+		jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(workshopJwt).Once()
+
 		_, err := workshopUsecase.Login(&entities.Workshops{
 			Email:    "zc@gmail.com",
 			Password: "jojo",
@@ -91,17 +99,27 @@ func TestLogin(t *testing.T) {
 
 func TestGetWorkshop(t *testing.T) {
 	setup()
+	t.Run("Test Get Workshop Valid", func(t *testing.T) {
+		workshopMysqlRepository.On("GetWorkshop",
+			mock.AnythingOfType("string")).Return(workshopDomain, nil).Once()
 
-	workshopMysqlRepository.On("GetWorkshop",
-		mock.AnythingOfType("string")).Return(workshopDomain, nil).Once()
+		jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(workshopJwt).Once()
 
-	jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(workshopJwt).Once()
-
-	t.Run("Test Get Workshop", func(t *testing.T) {
 		workshop, err := workshopUsecase.GetWorkshop("zc")
 
 		assert.Nil(t, err)
 		assert.Equal(t, "zc", workshop.Username)
+	})
+
+	t.Run("Test Get Workshop Invalid", func(t *testing.T) {
+		workshopMysqlRepository.On("GetWorkshop",
+			mock.AnythingOfType("string")).Return(workshopDomain, errors.New("")).Once()
+
+		jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(workshopJwt).Once()
+		
+		_, err := workshopUsecase.GetWorkshop("za")
+
+		assert.NotNil(t, err)
 	})
 }
 
@@ -131,46 +149,54 @@ func TestRegister(t *testing.T) {
 	})
 }
 
-func TestFindByID(t *testing.T) {
-	setup()
-
-	workshopScribleRepository.On("FindWorkshopRefreshToken",
-		mock.AnythingOfType("string")).Return(nil).Twice()
-
-	jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(workshopJwt).Twice()
-
-	t.Run("Test FindByID", func(t *testing.T) {
-		err := workshopUsecase.FindByID("1")
-
-		assert.Nil(t, err)
-	})
-}
-
 func TestLogOut(t *testing.T) {
 	setup()
 
-	workshopScribleRepository.On("DeleteWorkshopRefreshToken",
-		mock.AnythingOfType("string")).Return(nil).Once()
+	t.Run("Test LogOut 1 Valid", func(t *testing.T) {
+		workshopScribleRepository.On("FindWorkshopRefreshToken",
+			mock.AnythingOfType("string")).Return(nil).Once()
+		workshopScribleRepository.On("DeleteWorkshopRefreshToken",
+			mock.AnythingOfType("string")).Return(nil).Once()
+		workshopMysqlRepository.On("GetWorkshop",
+			mock.AnythingOfType("string")).Return(workshopDomain, nil).Once()
+		
+			jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(workshopJwt).Once()
 
-	jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(workshopJwt).Once()
-
-	t.Run("Test LogOut", func(t *testing.T) {
-		err := workshopUsecase.Logout("1", "1")
+		err := workshopUsecase.Logout("1", "zc")
 
 		assert.Nil(t, err)
+	})
+
+	t.Run("Test LogOut 2 Error", func(t *testing.T) {
+		workshopScribleRepository.On("FindWorkshopRefreshToken",
+			mock.AnythingOfType("string")).Return(errors.New("")).Once()
+		workshopScribleRepository.On("DeleteWorkshopRefreshToken",
+			mock.AnythingOfType("string")).Return(nil).Once()
+		workshopMysqlRepository.On("GetWorkshop",
+			mock.AnythingOfType("string")).Return(workshopDomain, nil).Once()
+		
+			jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(workshopJwt).Once()
+
+		err := workshopUsecase.Logout("1", "zcc")
+
+		assert.NotNil(t, err)
 	})
 }
 
 func TestUpdateAccount(t *testing.T) {
 	setup()
 
-	workshopMysqlRepository.On("UpdateAccount",
-		mock.Anything,
-		mock.AnythingOfType("uint64")).Return(workshopDomain, nil).Once()
+	t.Run("Test UpdateAccount 1", func(t *testing.T) {
+		workshopScribleRepository.On("FindWorkshopRefreshToken",
+			mock.AnythingOfType("string")).Return(nil).Once()
+		workshopMysqlRepository.On("GetWorkshop",
+			mock.AnythingOfType("string")).Return(workshopDomain, nil).Once()
+		workshopMysqlRepository.On("UpdateAccount",
+			mock.Anything,
+			mock.AnythingOfType("uint64")).Return(workshopDomain, nil).Once()
 
-	jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(workshopJwt).Once()
+		jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(workshopJwt).Once()
 
-	t.Run("Test UpdateAccount", func(t *testing.T) {
 		workshop, err := workshopUsecase.UpdateAccount(&entities.Workshops{
 			Username: "zc",
 			Email:    "zc@gmail.com",
@@ -179,23 +205,51 @@ func TestUpdateAccount(t *testing.T) {
 			Phone:    "0822",
 			OperationalStart: "Monday",
 			OperationalEnd: "Friday",
-		}, 1)
+		}, "zc")
 
 		assert.Nil(t, err)
-		assert.Equal(t, uint64(1), workshop.ID)
+		assert.Equal(t, "zc", workshop.Username)
+	})
+
+	t.Run("Test UpdateAccount 2", func(t *testing.T) {
+		workshopScribleRepository.On("FindWorkshopRefreshToken",
+			mock.AnythingOfType("string")).Return(errors.New("")).Once()
+		workshopMysqlRepository.On("GetWorkshop",
+			mock.AnythingOfType("string")).Return(workshopDomain, nil).Once()
+		workshopMysqlRepository.On("UpdateAccount",
+			mock.Anything,
+			mock.AnythingOfType("uint64")).Return(workshopDomain, nil).Once()
+
+		jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(workshopJwt).Once()
+
+		_, err := workshopUsecase.UpdateAccount(&entities.Workshops{
+			Username: "zc",
+			Email:    "zc@gmail.com",
+			Password: "asdf123",
+			Name:     "zc",
+			Phone:    "0822",
+			OperationalStart: "Monday",
+			OperationalEnd: "Friday",
+		}, "zc")
+
+		assert.NotNil(t, err)
 	})
 }
 
 func TestUpdateAddress(t *testing.T) {
 	setup()
 
-	workshopMysqlRepository.On("UpdateAddress",
-		mock.Anything,
-		mock.AnythingOfType("uint64")).Return(&workshopDomain.WorkshopAddress, nil).Once()
+	t.Run("Test UpdateAddress Valid", func(t *testing.T) {
+		workshopScribleRepository.On("FindWorkshopRefreshToken",
+			mock.AnythingOfType("string")).Return(nil).Once()
+		workshopMysqlRepository.On("GetWorkshop",
+			mock.AnythingOfType("string")).Return(workshopDomain, nil).Once()
+		workshopMysqlRepository.On("UpdateAddress",
+			mock.Anything,
+			mock.AnythingOfType("uint64")).Return(&workshopDomain.WorkshopAddress, nil).Once()
 
-	jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(workshopJwt).Once()
-
-	t.Run("Test UpdateAddress", func(t *testing.T) {
+		jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(workshopJwt).Once()
+		
 		address, err := workshopUsecase.UpdateAddress(&entities.WorkshopAddress{
 			BuildingNumber: "12A",
 			Street:         "Jl. Jember",
@@ -203,59 +257,129 @@ func TestUpdateAddress(t *testing.T) {
 			Country:        "Indonesia",
 			PostalCode:     "1111",
 			Province:       "Jatim",
-		}, 1)
+		}, "zc")
 
 		assert.Nil(t, err)
 		assert.Equal(t, "Jember", address.City)
 		assert.NotEqual(t, "Jakarta", address.City)
+	})
+
+	t.Run("Test UpdateAddress Invalid", func(t *testing.T) {
+		workshopScribleRepository.On("FindWorkshopRefreshToken",
+			mock.AnythingOfType("string")).Return(errors.New("")).Once()
+		workshopMysqlRepository.On("GetWorkshop",
+			mock.AnythingOfType("string")).Return(workshopDomain, nil).Once()
+		workshopMysqlRepository.On("UpdateAddress",
+			mock.Anything,
+			mock.AnythingOfType("uint64")).Return(&workshopDomain.WorkshopAddress, nil).Once()
+
+		jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(workshopJwt).Once()
+
+		_, err := workshopUsecase.UpdateAddress(&entities.WorkshopAddress{
+			BuildingNumber: "12A",
+			Street:         "Jl. Jember",
+			City:           "Jember",
+			Country:        "Indonesia",
+			PostalCode:     "1111",
+			Province:       "Jatim",
+		}, "zc")
+
+		assert.NotNil(t, err)
 	})
 }
 
 func TestGetAddress(t *testing.T) {
 	setup()
 
-	workshopMysqlRepository.On("GetAddress",
-		mock.AnythingOfType("uint64")).Return(&workshopDomain.WorkshopAddress, nil).Once()
+	t.Run("Test GetAddress 1", func(t *testing.T) {
+		workshopScribleRepository.On("FindWorkshopRefreshToken",
+			mock.AnythingOfType("string")).Return(nil).Once()
+		workshopMysqlRepository.On("GetWorkshop",
+			mock.AnythingOfType("string")).Return(workshopDomain, nil).Once()
+		workshopMysqlRepository.On("GetAddress",
+			mock.AnythingOfType("uint64")).Return(&workshopDomain.WorkshopAddress, nil).Once()
 
-	jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(workshopJwt).Once()
+		jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(workshopJwt).Once()
 
-	t.Run("Test GetAddress", func(t *testing.T) {
-		_, err := workshopUsecase.GetAddress(1)
+		_, err := workshopUsecase.GetAddress("zc")
 
 		assert.Nil(t, err)
+	})
+
+	t.Run("Test GetAddress 2", func(t *testing.T) {
+		workshopScribleRepository.On("FindWorkshopRefreshToken",
+			mock.AnythingOfType("string")).Return(errors.New("")).Once()
+		workshopMysqlRepository.On("GetWorkshop",
+			mock.AnythingOfType("string")).Return(workshopDomain, nil).Once()
+		workshopMysqlRepository.On("GetAddress",
+			mock.AnythingOfType("uint64")).Return(&workshopDomain.WorkshopAddress, nil).Once()
+
+		jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(workshopJwt).Once()
+
+		_, err := workshopUsecase.GetAddress("zc")
+
+		assert.NotNil(t, err)
 	})
 }
 
 func TestUpdateDescription(t *testing.T) {
 	setup()
 
-	workshopMysqlRepository.On("UpdateDescription",
-	mock.Anything,
-	mock.AnythingOfType("uint64")).Return(&workshopDomain.Description, nil).Once()
+	t.Run("Test UpdateDescription Valid", func(t *testing.T) {
+		workshopScribleRepository.On("FindWorkshopRefreshToken",
+			mock.AnythingOfType("string")).Return(nil).Once()
+		workshopMysqlRepository.On("GetWorkshop",
+			mock.AnythingOfType("string")).Return(workshopDomain, nil).Once()
+		workshopMysqlRepository.On("UpdateDescription",
+			mock.Anything,
+			mock.AnythingOfType("uint64")).Return(&workshopDomain.Description, nil).Once()
 
-	jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(workshopJwt).Once()
+		jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(workshopJwt).Once()
 
-	t.Run("Test UpdateDescription", func(t *testing.T) {
 		_, err := workshopUsecase.UpdateDescription(&entities.Descriptions{
 			ID: 1,
 			WorkshopID: 1,
 			Description: "ZC is the best workshop in the world!",
-		}, 1)
+		}, "cc")
 
 		assert.Nil(t, err)
+	})
+
+	t.Run("Test UpdateDescription Error", func(t *testing.T) {
+		workshopScribleRepository.On("FindWorkshopRefreshToken",
+			mock.AnythingOfType("string")).Return(errors.New("")).Once()
+		workshopMysqlRepository.On("GetWorkshop",
+			mock.AnythingOfType("string")).Return(workshopDomain, nil).Once()
+		workshopMysqlRepository.On("UpdateDescription",
+			mock.Anything,
+			mock.AnythingOfType("uint64")).Return(&workshopDomain.Description, nil).Once()
+
+		jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(workshopJwt).Once()
+
+		_, err := workshopUsecase.UpdateDescription(&entities.Descriptions{
+			ID: 1,
+			WorkshopID: 1,
+			Description: "ZC is the best workshop in the world!",
+		}, "cc")
+
+		assert.NotNil(t, err)
 	})
 }
 
 func TestServicesNew(t *testing.T) {
 	setup()
 
-	workshopMysqlRepository.On("ServicesNew",
-	mock.Anything,
-	mock.AnythingOfType("uint64")).Return(&workshopDomain.Services, nil).Once()
-
-	jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(workshopJwt).Once()
-
 	t.Run("Test ServicesNew", func(t *testing.T) {
+		workshopScribleRepository.On("FindWorkshopRefreshToken",
+			mock.AnythingOfType("string")).Return(nil).Once()
+		workshopMysqlRepository.On("GetWorkshop",
+			mock.AnythingOfType("string")).Return(workshopDomain, nil).Once()
+		workshopMysqlRepository.On("ServicesNew",
+			mock.Anything,
+			mock.AnythingOfType("uint64")).Return(&workshopDomain.Services, nil).Once()
+
+		jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(workshopJwt).Once()
+
 		_, err := workshopUsecase.ServicesNew(&entities.Services{
 			ID: 1,
 			WorkshopID: 1,
@@ -263,19 +387,46 @@ func TestServicesNew(t *testing.T) {
 			VehicleType: "Sport Car",
 			Services: "Body repair, Engine repair, and Performance booster",
 			Price: 100000000,
-		}, 1)
+		}, "zc")
 
 		assert.Nil(t, err)
+	})
+
+	t.Run("Test ServicesNew", func(t *testing.T) {
+		workshopScribleRepository.On("FindWorkshopRefreshToken",
+			mock.AnythingOfType("string")).Return(errors.New("")).Once()
+		workshopMysqlRepository.On("GetWorkshop",
+			mock.AnythingOfType("string")).Return(workshopDomain, nil).Once()
+		workshopMysqlRepository.On("ServicesNew",
+			mock.Anything,
+			mock.AnythingOfType("uint64")).Return(&workshopDomain.Services, nil).Once()
+
+		jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(workshopJwt).Once()
+
+		_, err := workshopUsecase.ServicesNew(&entities.Services{
+			ID: 1,
+			WorkshopID: 1,
+			Vehicle: "BMW 770",
+			VehicleType: "Sport Car",
+			Services: "Body repair, Engine repair, and Performance booster",
+			Price: 100000000,
+		}, "zc")
+
+		assert.NotNil(t, err)
 	})
 }
 
 func TestUpdateServices(t *testing.T) {
 	setup()
 
+	workshopScribleRepository.On("FindWorkshopRefreshToken",
+		mock.AnythingOfType("string")).Return(nil).Once()
+	workshopMysqlRepository.On("GetWorkshop",
+		mock.AnythingOfType("string")).Return(workshopDomain, nil).Once()
 	workshopMysqlRepository.On("UpdateServices",
-	mock.Anything,
-	mock.AnythingOfType("uint64"),
-	mock.AnythingOfType("uint64")).Return(&workshopDomain.Services, nil).Once()
+		mock.Anything,
+		mock.AnythingOfType("uint64"),
+		mock.AnythingOfType("uint64")).Return(&workshopDomain.Services, nil).Once()
 
 	jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(workshopJwt).Once()
 
@@ -287,7 +438,7 @@ func TestUpdateServices(t *testing.T) {
 			VehicleType: "Sport Car",
 			Services: "Body repair, Engine repair, and Performance booster",
 			Price: 100000000,
-		}, 1, "1")
+		}, "zc", "1")
 
 		assert.Nil(t, err)
 	})
@@ -300,7 +451,7 @@ func TestUpdateServices(t *testing.T) {
 			VehicleType: "Sport Car",
 			Services: "Body repair, Engine repair, and Performance booster",
 			Price: 100000000,
-		}, 1, "1a")
+		}, "zc", "1a")
 
 		assert.NotNil(t, err)
 	})
@@ -309,20 +460,24 @@ func TestUpdateServices(t *testing.T) {
 func TestDeleteServices(t *testing.T) {
 	setup()
 
+	workshopScribleRepository.On("FindWorkshopRefreshToken",
+		mock.AnythingOfType("string")).Return(nil).Once()
+	workshopMysqlRepository.On("GetWorkshop",
+		mock.AnythingOfType("string")).Return(workshopDomain, nil).Once()
 	workshopMysqlRepository.On("DeleteServices",
-	mock.AnythingOfType("uint64"),
-	mock.AnythingOfType("uint64")).Return(nil).Once()
+		mock.AnythingOfType("uint64"),
+		mock.AnythingOfType("uint64")).Return(nil).Once()
 
 	jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(workshopJwt).Once()
 
-	t.Run("Test DeleteServices 1", func(t *testing.T) {
-		err := workshopUsecase.DeleteServices(1, "1")
+	t.Run("Test DeleteServices 1 Valid", func(t *testing.T) {
+		err := workshopUsecase.DeleteServices("zc", "1")
 
 		assert.Nil(t, err)
 	})
 
-	t.Run("Test DeleteServices 2", func(t *testing.T) {
-		err := workshopUsecase.DeleteServices(1, "a")
+	t.Run("Test DeleteServices 2 Error", func(t *testing.T) {
+		err := workshopUsecase.DeleteServices("zc", "a")
 
 		assert.NotNil(t, err)
 	})
