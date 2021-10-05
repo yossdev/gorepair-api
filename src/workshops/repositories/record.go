@@ -14,8 +14,8 @@ type Workshop struct {
 	Password         string           `gorm:"size:255; not null"`
 	Name             string           `gorm:"size:125; not null"`
 	Phone            string           `gorm:"size:15; not null"`
-	OperationalStart string           `gorm:"size:6; not null"`
-	OperationalEnd   string           `gorm:"size:6; not null"`
+	OperationalStart string           `gorm:"size:15; not null"`
+	OperationalEnd   string           `gorm:"size:15; not null"`
 	Description      Description      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	Address          WorkshopAddress  `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	Services         []Service        `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`

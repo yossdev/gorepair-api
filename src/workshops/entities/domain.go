@@ -41,18 +41,17 @@ type Services struct {
 }
 
 type WorkshopService interface {
-	FindByID(id string) error
 	GetWorkshop(username string) (*Workshops, error)
 	Register(payload *Workshops, street, description string) (*Workshops, error)
 	Login(payload *Workshops) (interface{}, error)
-	Logout(id, ctxId string) error
-	UpdateAccount(payload *Workshops, id uint64) (*Workshops, error)
-	UpdateAddress(payload *WorkshopAddress, id uint64) (*WorkshopAddress, error)
-	GetAddress(id uint64) (*WorkshopAddress, error)
-	UpdateDescription(payload *Descriptions, id uint64) (*Descriptions, error)
-	ServicesNew(payload *Services, id uint64) (*Services, error)
-	UpdateServices(payload *Services, id uint64, servicesId string) (*Services, error)
-	DeleteServices(id uint64, servicesId string) error
+	Logout(ctxId, username string) error
+	UpdateAccount(payload *Workshops, username string) (*Workshops, error)
+	UpdateAddress(payload *WorkshopAddress, username string) (*WorkshopAddress, error)
+	GetAddress(username string) (*WorkshopAddress, error)
+	UpdateDescription(payload *Descriptions, username string) (*Descriptions, error)
+	ServicesNew(payload *Services, username string) (*Services, error)
+	UpdateServices(payload *Services, username, servicesId string) (*Services, error)
+	DeleteServices(username, servicesId string) error
 }
 
 type WorkshopMysqlRepositoryInterface interface {
