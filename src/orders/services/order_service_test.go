@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"gorepair-rest-api/src/orders/entities"
 	"gorepair-rest-api/src/orders/entities/mocks"
 	"testing"
@@ -33,6 +34,63 @@ func setup() {
 		TotalPrice: 123456789,
 		Placed: true,
 	}
+}
+
+
+func TestUserCancelOrder(t *testing.T) {
+	setup()
+
+	t.Run("Test UserCancelOrder 1 | Valid", func(t *testing.T) {
+		orderMysqlRepo.On("UserCancelOrder",
+			mock.AnythingOfType("uint64"),
+			mock.AnythingOfType("uint64"),
+			mock.AnythingOfType("string")).Return(nil).Once()
+		orderScribleRepo.On("FindUserRefreshToken",
+			mock.AnythingOfType("string")).Return(nil).Once()
+
+		err := orderUsecase.UserCancelOrder("1", "1", "jojo")
+
+		assert.Nil(t, err)
+	})
+
+	t.Run("Test UserCancelOrder 2 | Error", func(t *testing.T) {
+		orderMysqlRepo.On("UserCancelOrder",
+			mock.AnythingOfType("uint64"),
+			mock.AnythingOfType("uint64"),
+			mock.AnythingOfType("string")).Return(errors.New("")).Once()
+		orderScribleRepo.On("FindUserRefreshToken",
+			mock.AnythingOfType("string")).Return(errors.New("")).Once()
+
+		err := orderUsecase.UserCancelOrder("1", "1", "jojo")
+
+		assert.NotNil(t, err)
+	})
+
+	t.Run("Test UserCancelOrder 3 | Invalid", func(t *testing.T) {
+		orderMysqlRepo.On("UserCancelOrder",
+			mock.AnythingOfType("uint64"),
+			mock.AnythingOfType("uint64"),
+			mock.AnythingOfType("string")).Return(nil).Once()
+		orderScribleRepo.On("FindUserRefreshToken",
+			mock.AnythingOfType("string")).Return(nil).Once()
+
+		err := orderUsecase.UserCancelOrder("1", "1a", "jojo")
+
+		assert.NotNil(t, err)
+	})
+
+	t.Run("Test UserCancelOrder 4 | Invalid", func(t *testing.T) {
+		orderMysqlRepo.On("UserCancelOrder",
+			mock.AnythingOfType("uint64"),
+			mock.AnythingOfType("uint64"),
+			mock.AnythingOfType("string")).Return(nil).Once()
+		orderScribleRepo.On("FindUserRefreshToken",
+			mock.AnythingOfType("string")).Return(nil).Once()
+
+		err := orderUsecase.UserCancelOrder("1a", "1", "jojo")
+
+		assert.NotNil(t, err)
+	})
 }
 
 func TestOrderNew(t *testing.T) {
@@ -90,14 +148,14 @@ func TestGetUserOrderDetails(t *testing.T) {
 		assert.Nil(t, err)
 	})
 
-	t.Run("Test GetUserOrderDetails 2 | Invalid", func(t *testing.T) {
+	t.Run("Test GetUserOrderDetails 2 | Error", func(t *testing.T) {
 		orderMysqlRepo.On("GetUserOrderDetails",
 			mock.AnythingOfType("uint64"),
-			mock.AnythingOfType("uint64")).Return(&orderDomain, nil).Once()
+			mock.AnythingOfType("uint64")).Return(&orderDomain, errors.New("")).Once()
 		orderScribleRepo.On("FindUserRefreshToken",
-			mock.AnythingOfType("string")).Return(nil).Once()
+			mock.AnythingOfType("string")).Return(errors.New("")).Once()
 
-		_, err := orderUsecase.GetUserOrderDetails("1", "1s")
+		_, err := orderUsecase.GetUserOrderDetails("1", "1")
 
 		assert.NotNil(t, err)
 	})
@@ -109,10 +167,24 @@ func TestGetUserOrderDetails(t *testing.T) {
 		orderScribleRepo.On("FindUserRefreshToken",
 			mock.AnythingOfType("string")).Return(nil).Once()
 
+		_, err := orderUsecase.GetUserOrderDetails("1", "1s")
+
+		assert.NotNil(t, err)
+	})
+
+	t.Run("Test GetUserOrderDetails 4 | Invalid", func(t *testing.T) {
+		orderMysqlRepo.On("GetUserOrderDetails",
+			mock.AnythingOfType("uint64"),
+			mock.AnythingOfType("uint64")).Return(&orderDomain, nil).Once()
+		orderScribleRepo.On("FindUserRefreshToken",
+			mock.AnythingOfType("string")).Return(nil).Once()
+
 		_, err := orderUsecase.GetUserOrderDetails("1a", "1")
 
 		assert.NotNil(t, err)
 	})
+
+
 }
 
 func TestGetWorkshopOrderDetails(t *testing.T) {
@@ -130,14 +202,14 @@ func TestGetWorkshopOrderDetails(t *testing.T) {
 		assert.Nil(t, err)
 	})
 
-	t.Run("Test GetWorkshopOrderDetails 2 | Invalid", func(t *testing.T) {
+	t.Run("Test GetWorkshopOrderDetails 2 | Error", func(t *testing.T) {
 		orderMysqlRepo.On("GetWorkshopOrderDetails",
 			mock.AnythingOfType("uint64"),
-			mock.AnythingOfType("uint64")).Return(&orderDomain, nil).Once()
+			mock.AnythingOfType("uint64")).Return(&orderDomain, errors.New("")).Once()
 		orderScribleRepo.On("FindWorkshopRefreshToken",
-			mock.AnythingOfType("string")).Return(nil).Once()
+			mock.AnythingOfType("string")).Return(errors.New("")).Once()
 
-		_, err := orderUsecase.GetWorkshopOrderDetails("1", "1a")
+		_, err := orderUsecase.GetWorkshopOrderDetails("1", "1")
 
 		assert.NotNil(t, err)
 	})
@@ -149,50 +221,19 @@ func TestGetWorkshopOrderDetails(t *testing.T) {
 		orderScribleRepo.On("FindWorkshopRefreshToken",
 			mock.AnythingOfType("string")).Return(nil).Once()
 
+		_, err := orderUsecase.GetWorkshopOrderDetails("1", "1a")
+
+		assert.NotNil(t, err)
+	})
+
+	t.Run("Test GetWorkshopOrderDetails 4 | Invalid", func(t *testing.T) {
+		orderMysqlRepo.On("GetWorkshopOrderDetails",
+			mock.AnythingOfType("uint64"),
+			mock.AnythingOfType("uint64")).Return(&orderDomain, nil).Once()
+		orderScribleRepo.On("FindWorkshopRefreshToken",
+			mock.AnythingOfType("string")).Return(nil).Once()
+
 		_, err := orderUsecase.GetWorkshopOrderDetails("1a", "1")
-
-		assert.NotNil(t, err)
-	})
-}
-
-func TestUserCancelOrder(t *testing.T) {
-	setup()
-
-	t.Run("Test UserCancelOrder 1 | Valid", func(t *testing.T) {
-		orderMysqlRepo.On("UserCancelOrder",
-			mock.AnythingOfType("uint64"),
-			mock.AnythingOfType("uint64"),
-			mock.AnythingOfType("string")).Return(nil).Once()
-		orderScribleRepo.On("FindUserRefreshToken",
-			mock.AnythingOfType("string")).Return(nil).Once()
-
-		err := orderUsecase.UserCancelOrder("1", "1", "jojo")
-
-		assert.Nil(t, err)
-	})
-
-	t.Run("Test UserCancelOrder 2 | Invalid", func(t *testing.T) {
-		orderMysqlRepo.On("UserCancelOrder",
-			mock.AnythingOfType("uint64"),
-			mock.AnythingOfType("uint64"),
-			mock.AnythingOfType("string")).Return(nil).Once()
-		orderScribleRepo.On("FindUserRefreshToken",
-			mock.AnythingOfType("string")).Return(nil).Once()
-
-		err := orderUsecase.UserCancelOrder("1", "1a", "jojo")
-
-		assert.NotNil(t, err)
-	})
-
-	t.Run("Test UserCancelOrder 3 | Invalid", func(t *testing.T) {
-		orderMysqlRepo.On("UserCancelOrder",
-			mock.AnythingOfType("uint64"),
-			mock.AnythingOfType("uint64"),
-			mock.AnythingOfType("string")).Return(nil).Once()
-		orderScribleRepo.On("FindUserRefreshToken",
-			mock.AnythingOfType("string")).Return(nil).Once()
-
-		err := orderUsecase.UserCancelOrder("1a", "1", "jojo")
 
 		assert.NotNil(t, err)
 	})
