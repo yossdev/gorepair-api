@@ -3,6 +3,7 @@ package services
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"gorepair-rest-api/internal/utils/auth"
 	"gorepair-rest-api/internal/utils/helper"
 	"gorepair-rest-api/src/workshops/entities"
@@ -30,17 +31,13 @@ func NewWorkshopService(
 	}
 }
 
-func (c *workshopService) FindByID(id string) error {
-	err := c.workshopScribleRepository.FindWorkshopRefreshToken(id)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func (c *workshopService) GetWorkshop(username string) (*entities.Workshops, error) {
 	workshop, err := c.workshopMysqlRepository.GetWorkshop(username)
-	return workshop, err
+	if err != nil {
+		return nil, err
+	}
+
+	return workshop, nil
 }
 
 func (c *workshopService) Register(payload *entities.Workshops , street, description string) (*entities.Workshops, error) {
@@ -68,76 +65,163 @@ func (c *workshopService) Login(payload *entities.Workshops) (interface{}, error
 	return token, nil
 }
 
-func (c *workshopService) Logout(id, ctxId string) error {
+func (c *workshopService) Logout(ctxId, username string) error {
+	if err := c.workshopScribleRepository.FindWorkshopRefreshToken(ctxId); err != nil {
+		return err
+	}
+
+	workshop, err := c.workshopMysqlRepository.GetWorkshop(username)
+	if err != nil {
+		return err
+	}
+
+	id := fmt.Sprintf("%d", workshop.ID)
+	
 	if id != ctxId {
 		return errors.New("")
 	}
 
-	err := c.workshopScribleRepository.DeleteWorkshopRefreshToken(id)
-	if err != nil {
+	if err := c.workshopScribleRepository.DeleteWorkshopRefreshToken(id); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (c *workshopService) UpdateAccount(payload *entities.Workshops, id uint64) (*entities.Workshops, error) {
+func (c *workshopService) UpdateAccount(payload *entities.Workshops, username string) (*entities.Workshops, error) {
+	w, e := c.workshopMysqlRepository.GetWorkshop(username)
+	if e != nil {
+		return nil, e
+	}
+
+	id := fmt.Sprintf("%d", w.ID)
+
+	if err := c.workshopScribleRepository.FindWorkshopRefreshToken(id); err != nil {
+		return nil, err
+	}
+
 	payload.Password, _ = helper.Hash(payload.Password)
-	workshop, err := c.workshopMysqlRepository.UpdateAccount(payload, id)
+	workshop, err := c.workshopMysqlRepository.UpdateAccount(payload, w.ID)
 	if err != nil {
 		return workshop, err
 	}
 	return workshop, nil
 }
 
-func (c *workshopService) UpdateAddress(payload *entities.WorkshopAddress, id uint64) (*entities.WorkshopAddress, error) {
-	res, err := c.workshopMysqlRepository.UpdateAddress(payload, id)
+func (c *workshopService) UpdateAddress(payload *entities.WorkshopAddress, username string) (*entities.WorkshopAddress, error) {
+	w, e := c.workshopMysqlRepository.GetWorkshop(username)
+	if e != nil {
+		return nil, e
+	}
+
+	id := fmt.Sprintf("%d", w.ID)
+	
+	if err := c.workshopScribleRepository.FindWorkshopRefreshToken(id); err != nil {
+		return nil, err
+	}
+
+	res, err := c.workshopMysqlRepository.UpdateAddress(payload, w.ID)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-func (c *workshopService) GetAddress(id uint64) (*entities.WorkshopAddress, error)  {
-	address, err := c.workshopMysqlRepository.GetAddress(id)
+func (c *workshopService) GetAddress(username string) (*entities.WorkshopAddress, error)  {
+	w, e := c.workshopMysqlRepository.GetWorkshop(username)
+	if e != nil {
+		return nil, e
+	}
+
+	id := fmt.Sprintf("%d", w.ID)
+	
+	if err := c.workshopScribleRepository.FindWorkshopRefreshToken(id); err != nil {
+		return nil, err
+	}
+
+	address, err := c.workshopMysqlRepository.GetAddress(w.ID)
 	return address, err
 }
 
-func (c *workshopService) UpdateDescription(payload *entities.Descriptions, id uint64) (*entities.Descriptions, error) {
-	res, err := c.workshopMysqlRepository.UpdateDescription(payload, id)
+func (c *workshopService) UpdateDescription(payload *entities.Descriptions, username string) (*entities.Descriptions, error) {
+	w, e := c.workshopMysqlRepository.GetWorkshop(username)
+	if e != nil {
+		return nil, e
+	}
+
+	id := fmt.Sprintf("%d", w.ID)
+	
+	if err := c.workshopScribleRepository.FindWorkshopRefreshToken(id); err != nil {
+		return nil, err
+	}
+
+	res, err := c.workshopMysqlRepository.UpdateDescription(payload, w.ID)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-func (c *workshopService) ServicesNew(payload *entities.Services, id uint64) (*entities.Services, error) {
-	res, err := c.workshopMysqlRepository.ServicesNew(payload, id)
+func (c *workshopService) ServicesNew(payload *entities.Services, username string) (*entities.Services, error) {
+	w, e := c.workshopMysqlRepository.GetWorkshop(username)
+	if e != nil {
+		return nil, e
+	}
+
+	id := fmt.Sprintf("%d", w.ID)
+	
+	if err := c.workshopScribleRepository.FindWorkshopRefreshToken(id); err != nil {
+		return nil, err
+	}
+
+	res, err := c.workshopMysqlRepository.ServicesNew(payload, w.ID)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-func (c *workshopService) UpdateServices(payload *entities.Services, id uint64, servicesId string) (*entities.Services, error) {
+func (c *workshopService) UpdateServices(payload *entities.Services, username, servicesId string) (*entities.Services, error) {
 	servID, e := strconv.ParseUint(servicesId, 10, 64)
 	if e != nil {
 		return nil, e
 	}
 
-	res, err := c.workshopMysqlRepository.UpdateServices(payload, id, servID)
+	w, e := c.workshopMysqlRepository.GetWorkshop(username)
+	if e != nil {
+		return nil, e
+	}
+
+	id := fmt.Sprintf("%d", w.ID)
+	
+	if err := c.workshopScribleRepository.FindWorkshopRefreshToken(id); err != nil {
+		return nil, err
+	}
+
+	res, err := c.workshopMysqlRepository.UpdateServices(payload, w.ID, servID)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-func (c *workshopService) DeleteServices(id uint64, servicesId string) error {
+func (c *workshopService) DeleteServices(username, servicesId string) error {
 	servID, e := strconv.ParseUint(servicesId, 10, 64)
 	if e != nil {
 		return e
 	}
 
-	err := c.workshopMysqlRepository.DeleteServices(id, servID)
+	w, e := c.workshopMysqlRepository.GetWorkshop(username)
+	if e != nil {
+		return e
+	}
+
+	id := fmt.Sprintf("%d", w.ID)
+	
+	if err := c.workshopScribleRepository.FindWorkshopRefreshToken(id); err != nil {
+		return err
+	}
+
+	err := c.workshopMysqlRepository.DeleteServices(w.ID, servID)
 	if err != nil {
 		return err
 	}
