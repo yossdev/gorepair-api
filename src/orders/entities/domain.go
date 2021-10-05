@@ -15,8 +15,6 @@ type Orders struct {
 }
 
 type OrderService interface {
-	FindUserByID(id string) error
-	FindWorkshopByID(id string) error
 	OrderNew(payload *Orders, userId string) (*Orders, error)
 	GetUserOrderDetails(orderId, userId string) (*Orders, error)
 	GetWorkshopOrderDetails(orderId, workshopId string) (*Orders, error)

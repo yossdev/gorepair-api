@@ -21,29 +21,13 @@ func NewOrderService(
 	}
 }
 
-func (c *orderService) FindUserByID(id string) error {
-	err := c.orderScribleRepository.FindUserRefreshToken(id)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (c *orderService) FindWorkshopByID(id string) error {
-	err := c.orderScribleRepository.FindWorkshopRefreshToken(id)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func (c *orderService) OrderNew(payload *entities.Orders, userId string) (*entities.Orders, error) {
 	uID, err := strconv.ParseUint(userId, 10, 64)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := c.FindUserByID(userId); err != nil {
+	if err := c.orderScribleRepository.FindUserRefreshToken(userId); err != nil {
 		return nil, err
 	}
 
@@ -65,7 +49,7 @@ func (c *orderService) GetUserOrderDetails(orderId, userId string) (*entities.Or
 		return nil, err
 	}
 
-	if err := c.FindUserByID(userId); err != nil {
+	if err := c.orderScribleRepository.FindUserRefreshToken(userId); err != nil {
 		return nil, err
 	}
 
@@ -92,7 +76,7 @@ func (c *orderService) GetWorkshopOrderDetails(orderId, workshopId string) (*ent
 		return nil, err
 	}
 
-	if err := c.FindWorkshopByID(workshopId); err != nil {
+	if err := c.orderScribleRepository.FindWorkshopRefreshToken(workshopId); err != nil {
 		return nil, err
 	}
 
@@ -119,7 +103,7 @@ func (c *orderService) UserCancelOrder(orderId, userId, username string) error {
 		return err
 	}
 
-	if err := c.FindUserByID(userId); err != nil {
+	if err := c.orderScribleRepository.FindUserRefreshToken(userId); err != nil {
 		return err
 	}
 

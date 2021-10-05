@@ -2,7 +2,7 @@ package services
 
 import (
 	ipgeo "gorepair-rest-api/src/ip-geo"
-	_ipgeo "gorepair-rest-api/src/ip-geo/mocks"
+	_ipgeomock "gorepair-rest-api/src/ip-geo/mocks"
 	"gorepair-rest-api/src/w-services/entities"
 	"gorepair-rest-api/src/w-services/entities/mocks"
 	"testing"
@@ -15,7 +15,7 @@ import (
 
 var (
 	wservicesRepo mocks.WServicesMysqlRepositoryInterface
-	ipgeoRepo _ipgeo.Repository
+	ipgeoRepo _ipgeomock.Repository
 	wserviceUsecase entities.WServicesService
 	wserviceDomain entities.WServices
 	wsAddress _ws.WorkshopAddress
