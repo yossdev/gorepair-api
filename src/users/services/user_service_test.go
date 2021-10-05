@@ -83,31 +83,44 @@ func TestLogin(t *testing.T) {
 func TestGetUser(t *testing.T) {
 	setup()
 
-	userScribleRepository.On("FindUserRefreshToken",
-		mock.AnythingOfType("string")).Return(nil).Once()
-	userMysqlRepository.On("GetUser",
-		mock.AnythingOfType("string")).Return(userDomain, nil).Once()
+	t.Run("Test Get User 1 Valid", func(t *testing.T) {
+		userScribleRepository.On("FindUserRefreshToken",
+			mock.AnythingOfType("string")).Return(nil).Once()
+		userMysqlRepository.On("GetUser",
+			mock.AnythingOfType("string")).Return(userDomain, nil).Once()
 
-	jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(userJwt).Once()
+		jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(userJwt).Once()
 
-	t.Run("Test Get User", func(t *testing.T) {
 		user, err := userUsecase.GetUser("jojo123")
 
 		assert.Nil(t, err)
 		assert.Equal(t, "jojo123", user.Username)
+	})
+
+	t.Run("Test Get User 2 Error", func(t *testing.T) {
+		userScribleRepository.On("FindUserRefreshToken",
+			mock.AnythingOfType("string")).Return(errors.New("")).Once()
+		userMysqlRepository.On("GetUser",
+			mock.AnythingOfType("string")).Return(userDomain, nil).Once()
+
+		jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(userJwt).Once()
+		
+		_, err := userUsecase.GetUser("jojo123")
+
+		assert.NotNil(t, err)
 	})
 }
 
 func TestRegister(t *testing.T) {
 	setup()
 
-	userMysqlRepository.On("Register",
-		mock.Anything,
-		mock.AnythingOfType("string")).Return(userDomain, nil).Once()
+	t.Run("Test Register 1 Valid", func(t *testing.T) {
+		userMysqlRepository.On("Register",
+			mock.Anything,
+			mock.AnythingOfType("string")).Return(userDomain, nil).Once()
 
-	jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(userJwt).Once()
+		jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(userJwt).Once()
 
-	t.Run("Test Register", func(t *testing.T) {
 		user, err := userUsecase.Register(&entities.Users{
 			Username: "jojo123",
 			Email:    "jojo@gmail.com",
@@ -120,6 +133,26 @@ func TestRegister(t *testing.T) {
 
 		assert.Nil(t, err)
 		assert.Equal(t, "Jl. Jember", user.UserAddress.Street)
+	})
+
+	t.Run("Test Register 2 Error", func(t *testing.T) {
+		userMysqlRepository.On("Register",
+			mock.Anything,
+			mock.AnythingOfType("string")).Return(userDomain, errors.New("")).Once()
+
+		jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(userJwt).Once()
+
+		_, err := userUsecase.Register(&entities.Users{
+			Username: "jojo123",
+			Email:    "jojo@gmail.com",
+			Password: "asdf123",
+			Name:     "jojo",
+			Gender:   "M",
+			DOB:      time.Now(),
+			Phone:    "0822",
+		}, "Jl. Jember")
+
+		assert.NotNil(t, err)
 	})
 }
 
@@ -213,17 +246,17 @@ func TestUpdateAccount(t *testing.T) {
 func TestUpdateAddress(t *testing.T) {
 	setup()
 
-	userScribleRepository.On("FindUserRefreshToken",
-		mock.AnythingOfType("string")).Return(nil).Once()
-	userMysqlRepository.On("GetUser",
-		mock.AnythingOfType("string")).Return(userDomain, nil).Once()
-	userMysqlRepository.On("UpdateAddress",
-		mock.Anything,
-		mock.AnythingOfType("uint64")).Return(&userDomain.UserAddress, nil).Once()
+	t.Run("Test UpdateAddress 1 Valid", func(t *testing.T) {
+		userScribleRepository.On("FindUserRefreshToken",
+			mock.AnythingOfType("string")).Return(nil).Once()
+		userMysqlRepository.On("GetUser",
+			mock.AnythingOfType("string")).Return(userDomain, nil).Once()
+		userMysqlRepository.On("UpdateAddress",
+			mock.Anything,
+			mock.AnythingOfType("uint64")).Return(&userDomain.UserAddress, nil).Once()
 
-	jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(userJwt).Once()
+		jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(userJwt).Once()
 
-	t.Run("Test UpdateAddress", func(t *testing.T) {
 		address, err := userUsecase.UpdateAddress(&entities.UserAddress{
 			BuildingNumber: "12A",
 			Street:         "Jl. Jember",
@@ -236,6 +269,29 @@ func TestUpdateAddress(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, "Jember", address.City)
 		assert.NotEqual(t, "Jakarta", address.City)
+	})
+
+	t.Run("Test UpdateAddress 2 Error", func(t *testing.T) {
+		userScribleRepository.On("FindUserRefreshToken",
+			mock.AnythingOfType("string")).Return(errors.New("")).Once()
+		userMysqlRepository.On("GetUser",
+			mock.AnythingOfType("string")).Return(userDomain, nil).Once()
+		userMysqlRepository.On("UpdateAddress",
+			mock.Anything,
+			mock.AnythingOfType("uint64")).Return(&userDomain.UserAddress, nil).Once()
+
+		jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(userJwt).Once()
+
+		_, err := userUsecase.UpdateAddress(&entities.UserAddress{
+			BuildingNumber: "12A",
+			Street:         "Jl. Jember",
+			City:           "Jember",
+			Country:        "Indonesia",
+			PostalCode:     "1111",
+			Province:       "Jatim",
+		}, "jojo123")
+
+		assert.NotNil(t, err)
 	})
 }
 

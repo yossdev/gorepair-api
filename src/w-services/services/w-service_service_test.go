@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	ipgeo "gorepair-rest-api/src/ip-geo"
 	_ipgeomock "gorepair-rest-api/src/ip-geo/mocks"
 	"gorepair-rest-api/src/w-services/entities"
@@ -48,13 +49,21 @@ func setup() {
 func TestGetAll(t *testing.T) {
 	setup()
 
-	wservicesRepo.On("GetAll").Return([]entities.WServices{wserviceDomain}, nil).Once()
-	
-	t.Run("Test GetAll", func(t *testing.T) {
+	t.Run("Test GetAll Valid", func(t *testing.T) {
+		wservicesRepo.On("GetAll").Return([]entities.WServices{wserviceDomain}, nil).Once()
+
 		resp, err := wserviceUsecase.GetAll()
 
 		assert.Nil(t, err)
 		assert.Contains(t, resp, wserviceDomain)
+	})
+
+	t.Run("Test GetAll Error", func(t *testing.T) {
+		wservicesRepo.On("GetAll").Return([]entities.WServices{wserviceDomain}, errors.New("")).Once()
+
+		_, err := wserviceUsecase.GetAll()
+
+		assert.NotNil(t, err)
 	})
 }
 
@@ -89,13 +98,22 @@ func TestGetDetails(t *testing.T) {
 func TestGetAllWorkshop(t *testing.T) {
 	setup()
 
-	wservicesRepo.On("GetAllWorkshop",
-	mock.AnythingOfType("string")).Return([]_ws.WorkshopAddress{wsAddress}, nil).Once()
-	ipgeoRepo.On("GetLocationByIP").Return(locationIP, nil).Once()
-	
 	t.Run("Test GetAllWorkshop", func(t *testing.T) {
+		wservicesRepo.On("GetAllWorkshop",
+			mock.AnythingOfType("string")).Return([]_ws.WorkshopAddress{wsAddress}, nil).Once()
+		ipgeoRepo.On("GetLocationByIP").Return(locationIP, nil).Once()
+
 		_, err := wserviceUsecase.GetAllWorkshop()
 
 		assert.Nil(t, err)
+	})
+
+	t.Run("Test GetAllWorkshop", func(t *testing.T) {
+		wservicesRepo.On("GetAllWorkshop",
+			mock.AnythingOfType("string")).Return([]_ws.WorkshopAddress{wsAddress}, errors.New("")).Once()
+		ipgeoRepo.On("GetLocationByIP").Return(locationIP, nil).Once()
+		_, err := wserviceUsecase.GetAllWorkshop()
+
+		assert.NotNil(t, err)
 	})
 }
