@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"gorepair-rest-api/internal/utils/auth"
 	"gorepair-rest-api/src/users/entities"
 	"gorepair-rest-api/src/users/entities/mocks"
@@ -11,13 +12,15 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-var userMysqlRepository mocks.UserMysqlRepositoryInterface
-var userScribleRepository mocks.UserScribleRepositoryInterface
-var jwtAuth mocks.JwtTokenInterface
+var (
+	userMysqlRepository mocks.UserMysqlRepositoryInterface
+	userScribleRepository mocks.UserScribleRepositoryInterface
+	jwtAuth mocks.JwtTokenInterface
 
-var userUsecase entities.UserService
-var userDomain *entities.Users
-var userJwt auth.TokenStruct
+	userUsecase entities.UserService
+	userDomain *entities.Users
+	userJwt auth.TokenStruct
+)
 
 func setup() {
 	userUsecase = NewUserService(&userMysqlRepository, &userScribleRepository, &jwtAuth)
@@ -80,6 +83,8 @@ func TestLogin(t *testing.T) {
 func TestGetUser(t *testing.T) {
 	setup()
 
+	userScribleRepository.On("FindUserRefreshToken",
+		mock.AnythingOfType("string")).Return(nil).Once()
 	userMysqlRepository.On("GetUser",
 		mock.AnythingOfType("string")).Return(userDomain, nil).Once()
 
@@ -118,46 +123,69 @@ func TestRegister(t *testing.T) {
 	})
 }
 
-func TestFindByID(t *testing.T) {
-	setup()
+// // func TestFindByID(t *testing.T) {
+// // 	setup()
 
-	userScribleRepository.On("FindUserRefreshToken",
-		mock.AnythingOfType("string")).Return(nil).Twice()
+// // 	userScribleRepository.On("FindUserRefreshToken",
+// // 		mock.AnythingOfType("string")).Return(nil).Twice()
 
-	jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(userJwt).Twice()
+// // 	jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(userJwt).Twice()
 
-	t.Run("Test FindByID", func(t *testing.T) {
-		err := userUsecase.FindByID("1")
+// // 	t.Run("Test FindByID", func(t *testing.T) {
+// // 		err := userUsecase.FindByID("1")
 
-		assert.Nil(t, err)
-	})
-}
+// // 		assert.Nil(t, err)
+// // 	})
+// // }
 
 func TestLogOut(t *testing.T) {
 	setup()
 
-	userScribleRepository.On("DeleteUserRefreshToken",
-		mock.AnythingOfType("string")).Return(nil).Once()
+	t.Run("Test LogOut 1", func(t *testing.T) {
+		userScribleRepository.On("FindUserRefreshToken",
+			mock.AnythingOfType("string")).Return(nil).Once()
+		userScribleRepository.On("DeleteUserRefreshToken",
+			mock.AnythingOfType("string")).Return(nil).Once()
+		userMysqlRepository.On("GetUser",
+			mock.AnythingOfType("string")).Return(userDomain, nil).Once()
 
-	jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(userJwt).Once()
-
-	t.Run("Test LogOut", func(t *testing.T) {
-		err := userUsecase.Logout("1", "1")
+		jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(userJwt).Once()
+	
+		err := userUsecase.Logout("1", "jojo123")
 
 		assert.Nil(t, err)
+	})
+
+	t.Run("Test LogOut 2", func(t *testing.T) {
+		userScribleRepository.On("FindUserRefreshToken",
+			mock.AnythingOfType("string")).Return(errors.New("")).Once()
+		userScribleRepository.On("DeleteUserRefreshToken",
+			mock.AnythingOfType("string")).Return(nil).Once()
+		userMysqlRepository.On("GetUser",
+			mock.AnythingOfType("string")).Return(userDomain, nil).Once()
+
+		jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(userJwt).Once()
+	
+		err := userUsecase.Logout("1", "jojo12")
+
+		assert.NotNil(t, err)
 	})
 }
 
 func TestUpdateAccount(t *testing.T) {
 	setup()
 
-	userMysqlRepository.On("UpdateAccount",
-		mock.Anything,
-		mock.AnythingOfType("uint64")).Return(userDomain, nil).Once()
+	t.Run("Test UpdateAccount 1", func(t *testing.T) {
+		userScribleRepository.On("FindUserRefreshToken",
+			mock.AnythingOfType("string")).Return(nil).Once()
+		userMysqlRepository.On("GetUser",
+			mock.AnythingOfType("string")).Return(userDomain, nil).Once()
+		userMysqlRepository.On("UpdateAccount",
+			mock.Anything,
+			mock.AnythingOfType("uint64")).Return(userDomain, nil).Once()
 
-	jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(userJwt).Once()
+		jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(userJwt).Once()
 
-	t.Run("Test UpdateAccount", func(t *testing.T) {
 		user, err := userUsecase.UpdateAccount(&entities.Users{
 			Username: "jojo123",
 			Email:    "jojo@gmail.com",
@@ -166,16 +194,44 @@ func TestUpdateAccount(t *testing.T) {
 			Gender:   "M",
 			DOB:      time.Now(),
 			Phone:    "0822",
-		}, 1)
+		}, "jojo123")
 
 		assert.Nil(t, err)
-		assert.Equal(t, uint64(1), user.ID)
+		assert.Equal(t, "jojo123", user.Username)
+	})
+
+	t.Run("Test UpdateAccount 2", func(t *testing.T) {
+		userScribleRepository.On("FindUserRefreshToken",
+			mock.AnythingOfType("string")).Return(errors.New("")).Once()
+		userMysqlRepository.On("GetUser",
+			mock.AnythingOfType("string")).Return(userDomain, nil).Once()
+		userMysqlRepository.On("UpdateAccount",
+			mock.Anything,
+			mock.AnythingOfType("uint64")).Return(userDomain, nil).Once()
+
+		jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(userJwt).Once()
+
+		_, err := userUsecase.UpdateAccount(&entities.Users{
+			Username: "jojo123",
+			Email:    "jojo@gmail.com",
+			Password: "asdf123",
+			Name:     "jojo",
+			Gender:   "M",
+			DOB:      time.Now(),
+			Phone:    "0822",
+		}, "jojo123")
+
+		assert.NotNil(t, err)
 	})
 }
 
 func TestUpdateAddress(t *testing.T) {
 	setup()
 
+	userScribleRepository.On("FindUserRefreshToken",
+		mock.AnythingOfType("string")).Return(nil).Once()
+	userMysqlRepository.On("GetUser",
+		mock.AnythingOfType("string")).Return(userDomain, nil).Once()
 	userMysqlRepository.On("UpdateAddress",
 		mock.Anything,
 		mock.AnythingOfType("uint64")).Return(&userDomain.UserAddress, nil).Once()
@@ -190,7 +246,7 @@ func TestUpdateAddress(t *testing.T) {
 			Country:        "Indonesia",
 			PostalCode:     "1111",
 			Province:       "Jatim",
-		}, 1)
+		}, "jojo123")
 
 		assert.Nil(t, err)
 		assert.Equal(t, "Jember", address.City)
@@ -201,14 +257,48 @@ func TestUpdateAddress(t *testing.T) {
 func TestGetAddress(t *testing.T) {
 	setup()
 
-	userMysqlRepository.On("GetAddress",
-		mock.AnythingOfType("uint64")).Return(&userDomain.UserAddress, nil).Once()
+	t.Run("Test GetAddress 1", func(t *testing.T) {
+		userScribleRepository.On("FindUserRefreshToken",
+			mock.AnythingOfType("string")).Return(nil).Once()
+		userMysqlRepository.On("GetUser",
+			mock.AnythingOfType("string")).Return(userDomain, nil).Once()
+		userMysqlRepository.On("GetAddress",
+			mock.AnythingOfType("uint64")).Return(&userDomain.UserAddress, nil).Once()
 
-	jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(userJwt).Once()
+		jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(userJwt).Once()
 
-	t.Run("Test GetAddress", func(t *testing.T) {
-		_, err := userUsecase.GetAddress(1)
+		_, err := userUsecase.GetAddress("jojo123")
 
 		assert.Nil(t, err)
+	})
+
+	t.Run("Test GetAddress 2", func(t *testing.T) {
+		userScribleRepository.On("FindUserRefreshToken",
+			mock.AnythingOfType("string")).Return(errors.New("")).Once()
+		userMysqlRepository.On("GetUser",
+			mock.AnythingOfType("string")).Return(userDomain, nil).Once()
+		userMysqlRepository.On("GetAddress",
+			mock.AnythingOfType("uint64")).Return(&userDomain.UserAddress, nil).Once()
+
+		jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(userJwt).Once()
+
+		_, err := userUsecase.GetAddress("jojo123")
+
+		assert.NotNil(t, err)
+	})
+
+	t.Run("Test GetAddress 3", func(t *testing.T) {
+		userScribleRepository.On("FindUserRefreshToken",
+			mock.AnythingOfType("string")).Return(errors.New("")).Once()
+		userMysqlRepository.On("GetUser",
+			mock.AnythingOfType("string")).Return(nil, errors.New("")).Once()
+		userMysqlRepository.On("GetAddress",
+			mock.AnythingOfType("uint64")).Return(&userDomain.UserAddress, nil).Once()
+
+		jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(userJwt).Once()
+
+		_, err := userUsecase.GetAddress("jojo123")
+
+		assert.NotNil(t, err)
 	})
 }
