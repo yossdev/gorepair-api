@@ -28,7 +28,6 @@ type UserAddress struct {
 }
 
 type UserService interface {
-	// FindByID(id string) error
 	GetUser(username string) (*Users, error)
 	Register(payload *Users, street string) (*Users, error)
 	Login(payload *Users) (interface{}, error)

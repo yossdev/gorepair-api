@@ -123,21 +123,6 @@ func TestRegister(t *testing.T) {
 	})
 }
 
-// // func TestFindByID(t *testing.T) {
-// // 	setup()
-
-// // 	userScribleRepository.On("FindUserRefreshToken",
-// // 		mock.AnythingOfType("string")).Return(nil).Twice()
-
-// // 	jwtAuth.On("Sign", mock.AnythingOfType("MapClaims")).Return(userJwt).Twice()
-
-// // 	t.Run("Test FindByID", func(t *testing.T) {
-// // 		err := userUsecase.FindByID("1")
-
-// // 		assert.Nil(t, err)
-// // 	})
-// // }
-
 func TestLogOut(t *testing.T) {
 	setup()
 
