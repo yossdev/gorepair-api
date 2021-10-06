@@ -67,5 +67,5 @@ jobs:
             IdentityFile ~/.ssh/gorepair.pem
             StrictHostKeyChecking=no
           END
-      - name: connect EC2 -> remove all container -> pull from registry -> start #big bang deployment strategy
+      - name: connect EC2 && remove all container && pull from registry && start #big bang deployment strategy
         run: ssh development 'docker rm -f $(docker ps -a -q) && docker pull hawtz/gorepair:1.0.0 && docker run -d -p 8080:8080 --name=gorepair hawtz/gorepair:1.0.0'
