@@ -1,9 +1,11 @@
 name: Testing CI
 on:
   push:
-    branches: [develop]
+    branches:
+      - "develop"
   pull_request:
-    branches: [develop]
+    branches:
+      - "develop"
 
 jobs:
   # job 1: run unit test
@@ -20,7 +22,7 @@ jobs:
       - name: running unit test
         run: go test ./... -cover
 
-  # job 3: build docker
+  # job 3: build docker -> push
   build-push-docker:
     name: build image and push to registry
     runs-on: ubuntu-latest
@@ -60,12 +62,12 @@ jobs:
           mkdir -p ~/.ssh/
           echo "$SSH_KEY" > ~/.ssh/gorepair.pem
           chmod 400 ~/.ssh/gorepair.pem
-          cat >>~/.ssh/config <<END
+          cat >>~/.ssh/config<<END
           Host development
             HostName $SSH_HOST
             User $SSH_USER
             IdentityFile ~/.ssh/gorepair.pem
             StrictHostKeyChecking=no
           END
-      - name: connect EC2 && remove all container && pull from registry && start #big bang deployment strategy
-        run: ssh development 'docker rm -f $(docker ps -a -q) || true && docker pull hawtz/gorepair:1.0.0 && docker run -d -p 8080:8080 --name=gorepair hawtz/gorepair:1.0.0'
+      - name: connect EC2 -> remove all container -> pull from registry -> start #big bang deployment strategy
+        run: ssh development 'docker rm -f $(docker ps -a -q) && docker pull hawtz/gorepair:1.0.0 && docker run -d -p 8080:8080 --name=gorepair hawtz/gorepair:1.0.0'
