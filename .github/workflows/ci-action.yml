@@ -31,10 +31,10 @@ jobs:
       - uses: actions/checkout@v2
       - name: env file
         env:
-          CONFIG: ${{ secrets.ENV }}
+          SECRET_ENV: ${{ secrets.ENV }}
         run: |
           touch .env
-          echo "$CONFIG" > .env
+          echo "$SECRET_ENV" > .env
           chmod 777 .env
       - name: build docker
         run: docker build -t hawtz/gorepair:1.0.0 .
