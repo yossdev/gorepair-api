@@ -35,6 +35,12 @@ Final backend project alterra academy kampus merdeka using clean architecture.
 
 - [Free IP Geolocation API](https://freegeoip.app/)
 
+## CI/CD
+
+- [github actions](https://github.com/features/actions)
+- [docker](https://www.docker.com/)
+- [amazon EC2](https://aws.amazon.com/ec2/?ec2-whats-new.sort-by=item.additionalFields.postDateTime&ec2-whats-new.sort-order=desc)
+
 ## Other technology
 
 - jwt
@@ -44,6 +50,5 @@ Final backend project alterra academy kampus merdeka using clean architecture.
 - [rotateFilehook](https://pkg.go.dev/github.com/snowzach/rotatefilehook@v0.0.0-20180327172521-2f64f265f58c#section-readme)
 - [scribbleDB](https://github.com/nanobox-io/golang-scribble) for local_db (cache jwt)
 - [viper](https://github.com/spf13/viper)
-- [docker](https://www.docker.com/)
 - [mockery](https://github.com/vektra/mockery) - Mocking framework
 - [testify](https://github.com/stretchr/testify) - Testing toolkit

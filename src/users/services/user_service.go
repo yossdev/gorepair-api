@@ -32,11 +32,14 @@ func NewUserService(
 }
 
 func (c *userService) GetUser(username string) (*entities.Users, error) {
-	user, err := c.userMysqlRepository.GetUser(username)
+	user, e := c.userMysqlRepository.GetUser(username)
+	if e != nil {
+		return nil, e
+	}
 	if err := c.userScribleRepository.FindUserRefreshToken(fmt.Sprintf("%d", user.ID)); err != nil {
 		return nil, err
 	}
-	return user, err
+	return user, nil
 }
 
 func (c *userService) Register(payload *entities.Users , street string) (*entities.Users, error) {
