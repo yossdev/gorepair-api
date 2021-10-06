@@ -137,7 +137,7 @@ func (u *workshopMysqlRepository) DeleteServices(id, servicesId uint64) error {
 		return find.Error
 	}
 
-	del := u.DB.DB().Delete(&service)
+	del := u.DB.DB().Unscoped().Delete(&service)
 	if del.Error != nil {
 		return del.Error
 	}

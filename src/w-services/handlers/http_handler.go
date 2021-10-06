@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"gorepair-rest-api/infrastructures/third-party/freegeoapi"
 	"gorepair-rest-api/internal/web"
 	"gorepair-rest-api/src/w-services/dto"
 	"gorepair-rest-api/src/w-services/entities"
@@ -37,16 +36,15 @@ func (s *wservicesHandlers) GetAll(ctx *fiber.Ctx) error {
 
 func (s *wservicesHandlers) GetDetails(ctx *fiber.Ctx) error {
 	res, err := s.WServicesService.GetDetails(ctx.Params("serviceId"))
-	if err != nil {
+	if err != nil || res.ID == 0 {
 		return web.JsonResponse(ctx, http.StatusOK, web.ServicesNotExist, nil)
 	}
-	// ! CHANGE THISS
-	ipgeo, _ := freegeoapi.NewIpAPI().GetLocationByIP()
-	return web.JsonResponse(ctx, http.StatusOK, ipgeo.City, dto.FromDomainGetServices(res))
+
+	return web.JsonResponse(ctx, http.StatusOK, web.Success, dto.FromDomainGetServices(res))
 }
 
 func (s *wservicesHandlers) GetAllWorkshop(ctx *fiber.Ctx) error {
-	res, err := s.WServicesService.GetAllWorkshop()
+	res, err := s.WServicesService.GetAllWorkshop(ctx.IP())
 	if err != nil {
 		return web.JsonResponse(ctx, http.StatusOK, web.DataNotFound, nil)
 	}

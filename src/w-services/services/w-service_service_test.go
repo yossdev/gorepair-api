@@ -101,9 +101,10 @@ func TestGetAllWorkshop(t *testing.T) {
 	t.Run("Test GetAllWorkshop", func(t *testing.T) {
 		wservicesRepo.On("GetAllWorkshop",
 			mock.AnythingOfType("string")).Return([]_ws.WorkshopAddress{wsAddress}, nil).Once()
-		ipgeoRepo.On("GetLocationByIP").Return(locationIP, nil).Once()
+		ipgeoRepo.On("GetLocationByIP",
+			mock.AnythingOfType("string")).Return(locationIP, nil).Once()
 
-		_, err := wserviceUsecase.GetAllWorkshop()
+		_, err := wserviceUsecase.GetAllWorkshop("8.8.8.8")
 
 		assert.Nil(t, err)
 	})
@@ -111,8 +112,9 @@ func TestGetAllWorkshop(t *testing.T) {
 	t.Run("Test GetAllWorkshop", func(t *testing.T) {
 		wservicesRepo.On("GetAllWorkshop",
 			mock.AnythingOfType("string")).Return([]_ws.WorkshopAddress{wsAddress}, errors.New("")).Once()
-		ipgeoRepo.On("GetLocationByIP").Return(locationIP, nil).Once()
-		_, err := wserviceUsecase.GetAllWorkshop()
+		ipgeoRepo.On("GetLocationByIP",
+			mock.AnythingOfType("string")).Return(locationIP, nil).Once()
+		_, err := wserviceUsecase.GetAllWorkshop("8.8.8.8")
 
 		assert.NotNil(t, err)
 	})

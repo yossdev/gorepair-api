@@ -20,7 +20,7 @@ func NewWServicesMysqlRepository(DB db.MysqlDB) entities.WServicesMysqlRepositor
 func (u *wservicesMysqlRepository) GetAll() ([]entities.WServices, error) {
 	services := []Service{}
 
-	u.DB.DB().Where("deleted_at = ?", nil).Find(&services)
+	u.DB.DB().Find(&services)
 
 	return toDomainSlice(services), nil
 }
@@ -28,7 +28,7 @@ func (u *wservicesMysqlRepository) GetAll() ([]entities.WServices, error) {
 func (u *wservicesMysqlRepository) GetDetails(id uint64) (entities.WServices, error) {
 	services := Service{}
 	
-	res := u.DB.DB().Where("id = ?", id).Find(&services)
+	res := u.DB.DB().First(&services, "id = ?", id)
 	if res.Error != nil {
 		return services.toDomain(), res.Error
 	}
