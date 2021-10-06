@@ -51,6 +51,13 @@ jobs:
     needs: build-push-docker
     steps:
       - uses: actions/checkout@v2
+      - name: env file
+        env:
+          SECRET_ENV: ${{ secrets.ENV }}
+        run: |
+          touch .env
+          echo "$SECRET_ENV" > .env
+          chmod 400 .env
       - name: SSH configuration
         env:
           SSH_USER: ${{ secrets.SSH_USERNAME }}
