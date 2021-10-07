@@ -23,7 +23,7 @@ func (r *RouterStruct) GetRoute() {
 	workshopService := services.NewWorkshopService(workshopMysqlRepo, workshopScribleRepo, r.jwtAuth)
 	workshopHandlers := handlers.NewHttpHandler(workshopService)
 
-	v1 := r.Web.Group("/api/v1/workshop")
+	v1 := r.Web.Group("/api/v1/workshops")
 	v1.Post("/", workshopHandlers.Login)
 	v1.Get("/:username/logout", middleware.JwtVerifyRefresh, middleware.WorkshopRestricted, workshopHandlers.Logout)
 	v1.Post("/register", workshopHandlers.Register)

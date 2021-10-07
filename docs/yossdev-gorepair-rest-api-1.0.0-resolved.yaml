@@ -1,0 +1,862 @@
+---
+openapi: 3.0.0
+info:
+  title: GoRepair Rest API
+  description: GoRepair Rest API
+  version: 1.0.0
+servers:
+- url: https://virtserver.swaggerhub.com/yossdev/gorepair-rest-api/1.0.0
+  description: SwaggerHub API Auto Mocking
+paths:
+  /users:
+    post:
+      tags:
+      - users
+      summary: Operation for user login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/users_body'
+        required: true
+      responses:
+        "200":
+          description: OK
+          headers:
+            X-Rate-Limit:
+              description: calls per hour allowed by the user
+              style: simple
+              explode: false
+              schema:
+                type: integer
+                format: int32
+            X-Expires-After:
+              description: 100h till token expires
+              style: simple
+              explode: false
+              schema:
+                type: string
+                format: date-time
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+  /users/{username}/logout:
+    get:
+      tags:
+      - users
+      summary: Operation for getting user logout
+      parameters:
+      - name: username
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        default:
+          description: successful operation
+        "401":
+          description: Unauthorized
+  /users/register:
+    post:
+      tags:
+      - users
+      summary: Operation for user register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/users_register_body'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+  /users/{username}:
+    get:
+      tags:
+      - users
+      summary: Get user details by username
+      parameters:
+      - name: username
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+        "403":
+          description: Forbidden
+  /users/{username}/account:
+    put:
+      tags:
+      - users
+      summary: Operation for update user account
+      parameters:
+      - name: username
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/username_account_body'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+        "400":
+          description: Bad Request
+        "403":
+          description: Forbidden
+  /users/{username}/address/update:
+    put:
+      tags:
+      - users
+      summary: Operation for update user address
+      parameters:
+      - name: username
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/address_update_body'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+        "500":
+          description: Internal Serve Error
+  /users/{username}/address:
+    get:
+      tags:
+      - users
+      summary: Get user address
+      parameters:
+      - name: username
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+        "403":
+          description: Forbidden
+  /orders:
+    post:
+      tags:
+      - orders
+      summary: Place an order for workshop services
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/orders_body'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+        "400":
+          description: Bad request
+  /orders/user/{orderId}:
+    get:
+      tags:
+      - orders
+      summary: Order details by ID
+      description: For valid response try integer IDs with positive integer value.\ \ Negative or non-integer values will generate API errors
+      parameters:
+      - name: orderId
+        in: path
+        description: ID of order that needs to be fetched
+        required: true
+        style: simple
+        explode: false
+        schema:
+          minimum: 1
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+        "400":
+          description: Bad request | order not exist
+  /orders/workshop/{orderId}:
+    get:
+      tags:
+      - orders
+      summary: Order details by ID
+      description: For valid response try integer IDs with positive integer value.\ \ Negative or non-integer values will generate API errors
+      parameters:
+      - name: orderId
+        in: path
+        description: ID of order that needs to be fetched
+        required: true
+        style: simple
+        explode: false
+        schema:
+          minimum: 1
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+        "400":
+          description: Bad request | order not exist
+  /orders/user/{username}/{orderId}/cancel:
+    delete:
+      tags:
+      - orders
+      summary: Delete or cancel order by ID
+      description: For valid response try integer IDs with positive integer value.\ \ Negative or non-integer values will generate API errors
+      parameters:
+      - name: username
+        in: path
+        description: userID of order that needs to be deleted
+        required: true
+        style: simple
+        explode: false
+        schema:
+          minimum: 1
+          type: integer
+          format: int64
+      - name: orderId
+        in: path
+        description: ID of order that needs to be deleted
+        required: true
+        style: simple
+        explode: false
+        schema:
+          minimum: 1
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad request
+  /workshops:
+    post:
+      tags:
+      - workshops
+      summary: Operation of workshop login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/workshops_body'
+        required: true
+      responses:
+        "200":
+          description: OK
+          headers:
+            X-Rate-Limit:
+              description: calls per hour allowed by the user
+              style: simple
+              explode: false
+              schema:
+                type: integer
+                format: int32
+            X-Expires-After:
+              description: 100h till token expires
+              style: simple
+              explode: false
+              schema:
+                type: string
+                format: date-time
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+  /workshops/{username}/logout:
+    get:
+      tags:
+      - workshops
+      summary: Operation for getting workshop details by username
+      parameters:
+      - name: username
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        default:
+          description: successful operation
+        "401":
+          description: Unauthorized
+  /workshops/register:
+    post:
+      tags:
+      - workshops
+      summary: Operation of workshop register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/workshops_register_body'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+  /workshops/{username}:
+    get:
+      tags:
+      - workshops
+      summary: Get workshop details by username
+      parameters:
+      - name: username
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+  /workshops/{username}/account:
+    put:
+      tags:
+      - workshops
+      summary: Operation for update workshop account
+      parameters:
+      - name: username
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/username_account_body_1'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+        "400":
+          description: Bad request
+        "403":
+          description: Forbidden
+  /workshops/{username}/address/update:
+    put:
+      tags:
+      - workshops
+      summary: Operation for update workshop address
+      parameters:
+      - name: username
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/address_update_body_1'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+        "400":
+          description: Bad request
+        "403":
+          description: Forbidden
+  /workshops/{username}/address:
+    get:
+      tags:
+      - workshops
+      summary: Get workshop address
+      parameters:
+      - name: username
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+        "403":
+          description: Forbidden
+  /workshops/{username}/description:
+    put:
+      tags:
+      - workshops
+      summary: Operation for update workshop description
+      parameters:
+      - name: username
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/username_description_body'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+        "400":
+          description: Bad request
+        "403":
+          description: Forbidden
+  /workshops/{username}/services:
+    post:
+      tags:
+      - workshops
+      summary: Operation for workshop to create their services
+      parameters:
+      - name: username
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/username_services_body'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+        "400":
+          description: Bad request
+        "403":
+          description: Forbidden
+  /workshops/{username}/services/{servicesId}:
+    put:
+      tags:
+      - workshops
+      summary: Operation for update workshop services by ID
+      parameters:
+      - name: username
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: servicesId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/services_servicesId_body'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+        "400":
+          description: Bad request
+        "403":
+          description: Forbidden
+    delete:
+      tags:
+      - workshops
+      summary: Delete or services by ID
+      description: For valid response try integer IDs with positive integer value.\ \ Negative or non-integer values will generate API errors
+      parameters:
+      - name: username
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: servicesId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "403":
+          description: Forbidden
+  /services:
+    get:
+      tags:
+      - services
+      summary: Show all services
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+  /services/{servicesId}:
+    get:
+      tags:
+      - services
+      summary: Get services details by ID
+      parameters:
+      - name: servicesId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+  /services/workshops:
+    get:
+      tags:
+      - services
+      summary: Get all workshops based on IP address
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+components:
+  schemas:
+    users_body:
+      required:
+      - email
+      - password
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    inline_response_200:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+        data:
+          type: object
+    users_register_body:
+      required:
+      - dob
+      - email
+      - gender
+      - name
+      - password
+      - phone
+      - street
+      - username
+      type: object
+      properties:
+        username:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        phone:
+          type: string
+        dob:
+          type: string
+        gender:
+          type: string
+        street:
+          type: string
+    username_account_body:
+      required:
+      - dob
+      - email
+      - gender
+      - name
+      - password
+      - phone
+      - username
+      type: object
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        name:
+          type: string
+        gender:
+          type: string
+        dob:
+          type: string
+        phone:
+          type: string
+    address_update_body:
+      required:
+      - building_number
+      - city
+      - country
+      - postal_code
+      - province
+      - street
+      type: object
+      properties:
+        country:
+          type: string
+        province:
+          type: string
+        city:
+          type: string
+        street:
+          type: string
+        building_number:
+          type: string
+        postal_code:
+          type: string
+    orders_body:
+      type: object
+      properties:
+        workshopId:
+          type: integer
+        serviceId:
+          type: integer
+        onSite:
+          type: boolean
+          default: false
+        pickUp:
+          type: boolean
+          default: false
+        note:
+          type: string
+    workshops_body:
+      required:
+      - email
+      - password
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    workshops_register_body:
+      required:
+      - description
+      - email
+      - name
+      - operational_end
+      - operational_start
+      - password
+      - phone
+      - street
+      - username
+      type: object
+      properties:
+        username:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        phone:
+          type: string
+        operational_start:
+          type: string
+        operational_end:
+          type: string
+        street:
+          type: string
+        description:
+          type: string
+    username_account_body_1:
+      required:
+      - email
+      - name
+      - operational_end
+      - operational_start
+      - password
+      - phone
+      - username
+      type: object
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        name:
+          type: string
+        phone:
+          type: string
+        operational_start:
+          type: string
+        operational_end:
+          type: string
+    address_update_body_1:
+      required:
+      - building_number
+      - city
+      - country
+      - postal_code
+      - province
+      - street
+      type: object
+      properties:
+        country:
+          type: string
+        province:
+          type: string
+        city:
+          type: string
+        street:
+          type: string
+        building_number:
+          type: string
+        postal_code:
+          type: string
+    username_description_body:
+      type: object
+      properties:
+        description:
+          type: string
+    username_services_body:
+      type: object
+      properties:
+        vehicle:
+          type: string
+        vehicle_type:
+          type: string
+        services:
+          type: string
+        price:
+          type: integer
+    services_servicesId_body:
+      type: object
+      properties:
+        vehicle:
+          type: string
+        vehicle_type:
+          type: string
+        services:
+          type: string
+        price:
+          type: integer

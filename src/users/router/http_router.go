@@ -23,7 +23,7 @@ func (r *RouterStruct) GetRoute() {
 	userService := services.NewUserService(userMysqlRepo, userScribleRepo, r.jwtAuth)
 	userHandlers := handlers.NewHttpHandler(userService)
 
-	v1 := r.Web.Group("/api/v1/user")
+	v1 := r.Web.Group("/api/v1/users")
 	v1.Post("/", userHandlers.Login)
 	v1.Get("/:username/logout", middleware.JwtVerifyRefresh, middleware.UserRestricted, userHandlers.Logout)
 	v1.Post("/register", userHandlers.Register)
