@@ -1,12 +1,14 @@
 name: Testing CI
 on:
   push:
-    branches: [main, develop, user, workshop]
+    branches:
+      - "develop"
   pull_request:
-    branches: [main, develop, user, workshop]
+    branches:
+      - "develop"
 
 jobs:
-  # job 1: unit test
+  # job 1: run unit test
   unit-test:
     name: do unit test project gorepair
     runs-on: ubuntu-latest
@@ -19,3 +21,53 @@ jobs:
           go-version: 1.17
       - name: running unit test
         run: go test ./... -cover
+
+  # job 3: build docker -> push
+  build-push-docker:
+    name: build image and push to registry
+    runs-on: ubuntu-latest
+    needs: unit-test
+    steps:
+      - uses: actions/checkout@v2
+      - name: env file
+        env:
+          SECRET_ENV: ${{ secrets.ENV }}
+        run: |
+          touch .env
+          echo "$SECRET_ENV" > .env
+          chmod 777 .env
+      - name: build docker
+        run: docker build -t hawtz/gorepair:1.0.0 .
+      - name: login registry docker hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+      - name: push image to registry docker hub
+        run: docker push hawtz/gorepair:1.0.0
+
+  # job 4: deploy to ec2
+  deployment-ec2:
+    name: deploy to ec2 from registry docker hub
+    runs-on: ubuntu-latest
+    needs: build-push-docker
+    steps:
+      - uses: actions/checkout@v2
+      - name: SSH configuration
+        env:
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY" > ~/.ssh/gorepair.pem
+          chmod 400 ~/.ssh/gorepair.pem
+          cat >>~/.ssh/config<<END
+          Host development
+            HostName $SSH_HOST
+            User $SSH_USER
+            IdentityFile ~/.ssh/gorepair.pem
+            StrictHostKeyChecking=no
+          END
+      - name: connect EC2 -> remove all container -> pull from registry -> start #big bang deployment strategy
+        run: ssh development 'docker rm -f $(docker ps -a -q) && docker pull hawtz/gorepair:1.0.0 && docker run -d -p 8080:8080 --name gorepair hawtz/gorepair:1.0.0'

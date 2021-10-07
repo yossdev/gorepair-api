@@ -1,17 +1,20 @@
 # Files
 .dockerignore
-.gitignore
-.env
 .env.example
 .env.test
+.gitignore
 Docker-compose.yaml
 Dockerfile
 Makefile
 **/*.md
 **/*_test.go
 
+# Test
+*.out
+
 # Folders
 .git/
 .github/
 build/
 temp/
+cli/

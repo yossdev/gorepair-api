@@ -14,7 +14,7 @@ type WServices struct {
 type WServicesService interface {
 	GetAll() ([]WServices, error)
 	GetDetails(id string) (WServices, error)
-	GetAllWorkshop() ([]_ws.WorkshopAddress, error)
+	GetAllWorkshop(ip string) ([]_ws.WorkshopAddress, error)
 }
 
 type WServicesMysqlRepositoryInterface interface {

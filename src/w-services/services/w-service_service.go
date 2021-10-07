@@ -43,8 +43,8 @@ func (c *wservicesService) GetDetails(servicesId string) (entities.WServices, er
 	return res, nil
 }
 
-func (c *wservicesService) GetAllWorkshop() ([]_ws.WorkshopAddress, error) {
-	ipgeo, err := c.ipgeo.GetLocationByIP()
+func (c *wservicesService) GetAllWorkshop(ip string) ([]_ws.WorkshopAddress, error) {
+	ipgeo, err := c.ipgeo.GetLocationByIP(ip)
 	if err != nil {
 		return nil, err
 	}

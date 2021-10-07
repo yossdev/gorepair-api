@@ -36,15 +36,15 @@ func (s *wservicesHandlers) GetAll(ctx *fiber.Ctx) error {
 
 func (s *wservicesHandlers) GetDetails(ctx *fiber.Ctx) error {
 	res, err := s.WServicesService.GetDetails(ctx.Params("serviceId"))
-	if err != nil {
-		return web.JsonResponse(ctx, http.StatusOK, web.ServicesNotExist, dto.FromDomainGetServices(res))
+	if err != nil || res.ID == 0 {
+		return web.JsonResponse(ctx, http.StatusOK, web.ServicesNotExist, nil)
 	}
 
 	return web.JsonResponse(ctx, http.StatusOK, web.Success, dto.FromDomainGetServices(res))
 }
 
 func (s *wservicesHandlers) GetAllWorkshop(ctx *fiber.Ctx) error {
-	res, err := s.WServicesService.GetAllWorkshop()
+	res, err := s.WServicesService.GetAllWorkshop(ctx.IP())
 	if err != nil {
 		return web.JsonResponse(ctx, http.StatusOK, web.DataNotFound, nil)
 	}

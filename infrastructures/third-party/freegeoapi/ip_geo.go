@@ -18,8 +18,8 @@ func NewIpAPI() _ipgeo.Repository {
 	}
 }
 
-func (ipl *IpAPI) GetLocationByIP() (_ipgeo.Domain, error) {
-	url := "https://freegeoip.app/json/"
+func (ipl *IpAPI) GetLocationByIP(ip string) (_ipgeo.Domain, error) {
+	url := "https://freegeoip.app/json/"+ip
 	req, _ := http.NewRequest("GET", url, nil)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
